@@ -33,3 +33,18 @@ Diese User Story ist zentral für das Epic "Raum buchen", da sie den Übergang v
 ## Zugehöriges Epic
 
 [CLVN-015 - Raum buchen](/docs/produkt/backlog/CLVN-015-EPIC-raum-buchen.md)
+
+## Planung
+
+Reine Frontend-Story (kein Backend, Daten gemockt). Schritt 2 des Buchungsprozesses
+(`schritt-raeume.tsx`) wird vom Sofort-Sprung in den Ablauf
+**Auswählen → Hervorheben → Zusammenfassung (Details + Zeitraum) → Bestätigen → Schritt 3**
+umgebaut. Die Zusammenfassung wird als wiederverwendbare Komponente extrahiert und mit
+Schritt 3 geteilt. Darstellung als Inline-Panel; Auswahl und Bestätigung sind getrennt
+(keine Express-Auswahl).
+
+## Subtasks
+
+- [CLVN-028 RaumZusammenfassung-Komponente extrahieren](./CLVN-028-SUBTASK-raumzusammenfassung-extrahieren.md)
+- [CLVN-029 Raumauswahl mit Hervorhebung und Inline-Zusammenfassung](./CLVN-029-SUBTASK-auswahl-und-hervorhebung.md)
+- [CLVN-030 Raumauswahl bestätigen und fortfahren](./CLVN-030-SUBTASK-auswahl-bestaetigen.md)

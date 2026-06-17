@@ -64,6 +64,8 @@ GL --> Calvin : Sieht Reports
 
 Das Calvin-System besteht aus einer Single Page Application (SPA) und einem separaten Booking Service. Diese Architektur wurde für die Prototyping-Phase optimiert und ermöglicht eine klare Trennung zwischen Benutzeroberfläche und Geschäftslogik.
 
+Die **Ressourcen** (Standorte, Räume, Ausstattung) werden im Prototyp als **Mock-Daten in der SPA** geführt; es gibt keinen separaten Ressource-Service. Der Booking Service arbeitet ausschließlich mit den **Ressourcen-IDs** aus diesen Mock-Daten (siehe [ADR-002](../architektur/adrs/ADR-002-ressourcendaten-als-mock-in-spa.md)).
+
 ```plantuml
 @startuml
 !theme plain
@@ -75,12 +77,15 @@ actor "Geschäftsleitung" as gl
 
 package "Calvin System" {
     component "SPA\n(Single Page Application)" as spa
+    component "Ressourcen\n(Mock-Daten)" as resources
     component "Booking Service" as booking
 }
 
 consultant --> spa : Bucht Räume &\nArbeitsplätze
 gl --> spa : Sieht Reports
+spa --> resources : Liest Standorte,\nRäume, Ausstattung
 spa --> booking : REST API\n(JSON)
+booking ..> resources : referenziert nur\nRessourcen-IDs
 
 @enduml
 ```
@@ -89,18 +94,35 @@ spa --> booking : REST API\n(JSON)
 
 | Baustein | Verantwortlichkeit | Quellcode |
 |----------|-------------------|-----------|
-| **SPA** | Benutzeroberfläche für Buchungen, Kalenderansichten und Reports | `frontend/` |
-| **Booking Service** | Buchungslogik, Validierung, Konfliktprüfung, Auswertungsdaten | `backend/` |
+| **SPA** | Benutzeroberfläche für Buchungen, Kalenderansichten und Reports; hält den **Ressourcenkatalog als Mock-Daten** (Standorte, Räume, Ausstattung) | `frontend/` |
+| **Booking Service** | Buchungslogik, Validierung, Konfliktprüfung, Auswertungsdaten; arbeitet nur mit **Ressourcen-IDs** (kein eigener Ressourcenkatalog) | `backend/` |
+
+### Ressourcendaten
+
+Standorte, Räume und Ausstattung liegen im Prototyp als Mock-Daten in der SPA. Der Booking Service speichert Buchungen mit Referenz auf die Ressourcen-IDs, validiert deren Existenz aber **nicht** serverseitig. Diese bewusste Vereinfachung ist als technische Schuld erfasst ([TS-1](../architektur/technische-schulden.md#ts-1-ressourcendaten-nur-als-mock-in-der-spa)).
+
+### Authentifizierung (Prototyp)
+
+Der Prototyp verzichtet auf die geplante Okta-Integration und nutzt **Basic-Auth ohne Passwörter** ([ADR-003](../architektur/adrs/ADR-003-basic-auth-statt-okta-im-prototyp.md)). Damit ist [Qualitätsszenario QS-4](../architektur/qualitätsanforderungen.md#qs-4-schutz-von-zugang-und-personenbezogenen-buchungsdaten) im Prototyp noch nicht erfüllt — siehe technische Schuld [TS-2](../architektur/technische-schulden.md#ts-2-basic-auth-ohne-passwörter-statt-okta).
 
 ### Schnittstelle: SPA → Booking Service
 
-Die SPA kommuniziert mit dem Booking Service über eine REST API (JSON über HTTPS). Die API-Spezifikation wird als OpenAPI-Dokument im Backend gepflegt.
+Die SPA kommuniziert mit dem Booking Service über eine REST API (JSON über HTTPS). Die API-Spezifikation wird als OpenAPI-Dokument im Backend gepflegt. Die Authentifizierung erfolgt im Prototyp über Basic-Auth ohne Passwörter (siehe oben).
 
 ---
 
 ## Architekturentscheidungen
 
-Architekturentscheidungen sind als Architecture Decision Records (ADR) dokumentiert. Die ADRs findest du unter `docs/arc42/adrs/`.
+Architekturentscheidungen sind als Architecture Decision Records (ADR) dokumentiert. Die ADRs findest du unter `docs/arc42/adrs/` sowie unter `docs/architektur/adrs/`.
+
+| ADR | Entscheidung |
+|-----|--------------|
+| [Frontend-Prototyp & Booking Service](adrs/ADR-001-frontend-prototyp-und-booking-service.md) | SPA-Prototyp plus separater Booking Service (REST/JSON). |
+| [Technologie-Stack Booking Service](../architektur/adrs/ADR-001-technologie-stack-fuer-booking-service.md) | Java / Spring Boot für den Booking Service. |
+| [Ressourcendaten als Mock in der SPA](../architektur/adrs/ADR-002-ressourcendaten-als-mock-in-spa.md) | Kein Ressource-Service; Standorte/Räume/Ausstattung als Mock-Daten, Booking Service nutzt nur IDs. |
+| [Basic-Auth statt Okta im Prototyp](../architektur/adrs/ADR-003-basic-auth-statt-okta-im-prototyp.md) | Basic-Auth ohne Passwörter im Prototyp; Okta/OIDC später. |
+
+Bewusst eingegangene Vereinfachungen sind als [technische Schulden](../architektur/technische-schulden.md) erfasst.
 
 ---
 

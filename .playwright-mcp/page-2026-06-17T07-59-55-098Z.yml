@@ -1,0 +1,125 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: C
+        - generic [ref=e8]: Calvin
+      - navigation [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+          - text: Dashboard
+        - link "Raum buchen" [ref=e14] [cursor=pointer]:
+          - /url: /buchen
+          - img [ref=e15]
+          - text: Raum buchen
+        - link "Meine Buchungen" [ref=e16] [cursor=pointer]:
+          - /url: /buchungen
+          - img [ref=e17]
+          - text: Meine Buchungen
+        - link "Übersicht" [ref=e19] [cursor=pointer]:
+          - /url: /uebersicht
+          - img [ref=e20]
+          - text: Übersicht
+      - generic [ref=e26]:
+        - img [ref=e27]
+        - generic [ref=e30]:
+          - text: "Dein Standort:"
+          - strong [ref=e31]: Köln
+    - generic [ref=e32]:
+      - banner [ref=e33]:
+        - generic [ref=e34]:
+          - button [ref=e35]:
+            - img [ref=e36]
+          - generic [ref=e40]:
+            - generic [ref=e42]: AB
+            - generic [ref=e43]: Alex Berger
+      - main [ref=e44]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - heading "Guten Morgen, Alex!" [level=1] [ref=e48]
+            - paragraph [ref=e49]: Mi, 17. Jun 2026
+          - generic [ref=e50]:
+            - generic [ref=e52]:
+              - img [ref=e53]
+              - text: Raum schnell buchen
+            - generic [ref=e57]:
+              - generic [ref=e58]:
+                - text: Standort
+                - combobox [ref=e59]:
+                  - img
+                  - generic [ref=e60]: koeln
+                  - img: ▼
+                - textbox [ref=e61]: koeln
+              - generic [ref=e62]:
+                - text: Von
+                - combobox [ref=e63]:
+                  - img
+                  - generic [ref=e64]: 09:00
+                  - img: ▼
+                - textbox [ref=e65]: 09:00
+              - generic [ref=e66]:
+                - text: Bis
+                - combobox [ref=e67]:
+                  - img
+                  - generic [ref=e68]: 10:00
+                  - img: ▼
+                - textbox [ref=e69]: 10:00
+              - button "Verfügbare Räume" [ref=e70]:
+                - text: Verfügbare Räume
+                - img
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - heading "Meine nächsten Buchungen" [level=2] [ref=e73]:
+                - img [ref=e74]
+                - text: Meine nächsten Buchungen
+              - button "Alle ansehen" [ref=e77]
+            - generic [ref=e78]:
+              - generic [ref=e80] [cursor=pointer]:
+                - generic [ref=e81]:
+                  - img [ref=e82]
+                  - text: Heute · 14:00–15:30
+                - generic [ref=e85]: Bergkristall
+                - generic [ref=e86]:
+                  - img [ref=e87]
+                  - text: Köln
+                - generic [ref=e90]: „Q3 Planungsmeeting"
+              - generic [ref=e92] [cursor=pointer]:
+                - generic [ref=e93]:
+                  - img [ref=e94]
+                  - text: 22. Jun · 10:00–12:00
+                - generic [ref=e97]: Elbe
+                - generic [ref=e98]:
+                  - img [ref=e99]
+                  - text: Hamburg
+                - generic [ref=e102]: „Kundenworkshop"
+              - generic [ref=e104] [cursor=pointer]:
+                - generic [ref=e105]:
+                  - img [ref=e106]
+                  - text: 24. Jun · 09:00–10:30
+                - generic [ref=e109]: Rheingold
+                - generic [ref=e110]:
+                  - img [ref=e111]
+                  - text: Köln
+                - generic [ref=e114]: „Architektur-Sync"
+          - generic [ref=e115]:
+            - heading "Wer ist heute in Köln?" [level=2] [ref=e116]:
+              - img [ref=e117]
+              - text: Wer ist heute in Köln?
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - generic [ref=e127]: PM
+                - generic [ref=e128]: Petra Müller
+              - generic [ref=e129]:
+                - generic [ref=e131]: JK
+                - generic [ref=e132]: Jonas Klein
+              - generic [ref=e133]:
+                - generic [ref=e135]: SW
+                - generic [ref=e136]: Sarah Wagner
+              - generic [ref=e137]:
+                - generic [ref=e139]: TB
+                - generic [ref=e140]: Tim Becker
+              - generic [ref=e141]:
+                - generic [ref=e143]: LH
+                - generic [ref=e144]: Lena Hoffmann
+  - region "Notifications alt+T"

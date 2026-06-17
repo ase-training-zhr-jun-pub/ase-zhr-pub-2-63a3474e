@@ -9,7 +9,21 @@
         "commit": "",
         "pr": ""
     },
-    "hooks": {},
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Write|Edit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/format-java.sh",
+                        "timeout": 120,
+                        "statusMessage": "Formatiere Java (Spotless)…"
+                    }
+                ]
+            }
+        ]
+    },
     "enableAllProjectMcpServers": true,
     "enabledMcpjsonServers": [
         "context7",

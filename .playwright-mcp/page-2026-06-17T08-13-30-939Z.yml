@@ -1,0 +1,106 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: C
+        - generic [ref=e8]: Calvin
+      - navigation [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+          - text: Dashboard
+        - link "Raum buchen" [ref=e14] [cursor=pointer]:
+          - /url: /buchen
+          - img [ref=e15]
+          - text: Raum buchen
+        - link "Meine Buchungen" [ref=e16] [cursor=pointer]:
+          - /url: /buchungen
+          - img [ref=e17]
+          - text: Meine Buchungen
+        - link "Übersicht" [ref=e19] [cursor=pointer]:
+          - /url: /uebersicht
+          - img [ref=e20]
+          - text: Übersicht
+      - generic [ref=e26]:
+        - img [ref=e27]
+        - generic [ref=e30]:
+          - text: "Dein Standort:"
+          - strong [ref=e31]: Köln
+    - generic [ref=e32]:
+      - banner [ref=e33]:
+        - generic [ref=e34]:
+          - button [ref=e35]:
+            - img [ref=e36]
+          - generic [ref=e40]:
+            - generic [ref=e42]: AB
+            - generic [ref=e43]: Alex Berger
+      - main [ref=e44]:
+        - generic [ref=e173]:
+          - generic [ref=e174]:
+            - heading "Raum buchen" [level=1] [ref=e175]
+            - paragraph [ref=e176]: In vier Schritten zum passenden Konferenzraum.
+          - generic [ref=e178]:
+            - generic [ref=e180]:
+              - img [ref=e182]
+              - generic [ref=e184]: Zeitraum
+            - generic [ref=e187]:
+              - img [ref=e189]
+              - generic [ref=e191]: Raum
+            - generic [ref=e194]:
+              - generic [ref=e195]: "3"
+              - generic [ref=e196]: Details
+            - generic [ref=e199]:
+              - generic [ref=e200]: "4"
+              - generic [ref=e201]: Bestätigung
+          - generic [ref=e202]:
+            - generic [ref=e203]:
+              - generic [ref=e205]: Details zur Buchung
+              - generic [ref=e206]:
+                - generic [ref=e207]:
+                  - generic [ref=e208]: Meetingtitel
+                  - textbox "Meetingtitel" [active] [ref=e209]:
+                    - /placeholder: z. B. Sprint Planning, Kundenworkshop …
+                  - paragraph [ref=e210]: Hilft dir und Kollegen, die Buchung wiederzuerkennen.
+                - generic [ref=e211]:
+                  - generic [ref=e212]: Notiz (optional)
+                  - textbox "Notiz (optional)" [ref=e213]:
+                    - /placeholder: z. B. Catering bestellt, Whiteboard vorbereiten …
+                - generic [ref=e214]:
+                  - button "Zurück" [ref=e215]:
+                    - img
+                    - text: Zurück
+                  - button "Verbindlich buchen" [ref=e216]:
+                    - img
+                    - text: Verbindlich buchen
+            - generic [ref=e217]:
+              - generic [ref=e219]: Zusammenfassung
+              - generic [ref=e220]:
+                - generic [ref=e221]:
+                  - generic [ref=e222]: Bergkristall
+                  - generic [ref=e223]: Heller Besprechungsraum mit Blick auf den Rhein, ideal für Team-Meetings.
+                - separator [ref=e224]
+                - generic [ref=e225]:
+                  - generic [ref=e226]:
+                    - img [ref=e227]
+                    - text: Köln · 2. OG
+                  - generic [ref=e230]:
+                    - img [ref=e231]
+                    - text: Heute Mi, 17. Jun 2026
+                  - generic [ref=e233]:
+                    - img [ref=e234]
+                    - text: 08:00–09:00 Uhr
+                  - generic [ref=e237]:
+                    - img [ref=e238]
+                    - text: bis 4 Personen
+                - separator [ref=e243]
+                - generic [ref=e244]:
+                  - generic [ref=e245]:
+                    - img
+                    - text: Whiteboard
+                  - generic [ref=e246]:
+                    - img
+                    - text: TV
+                  - generic [ref=e247]:
+                    - img
+                    - text: Videokonferenz
+  - region "Notifications alt+T"

@@ -1,28 +1,39 @@
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { AppLayout } from "@/components/app-layout"
+import { BuchungProvider } from "@/lib/buchung-context"
+import { Toaster } from "@/components/ui/sonner"
+import { DashboardPage } from "@/pages/dashboard"
+import { BuchenPage } from "@/pages/buchen"
+import { MeineBuchungenPage } from "@/pages/meine-buchungen"
+import { UebersichtPage } from "@/pages/uebersicht"
+
+// basename für den Betrieb hinter dem Crucible-Proxy zur Laufzeit aus der
+// Browser-URL ableiten. Der Proxy-Pfad (…/proxy/<port>) bleibt in der Adresszeile
+// sichtbar, auch wenn er für Backend-Requests gestrippt wird — das Routing muss ihn
+// also als basename kennen. Lokal (kein /proxy/-Segment) → undefined.
+function ermittleBasename(): string | undefined {
+  if (typeof window === "undefined") return undefined
+  const match = window.location.pathname.match(/^(.*\/proxy\/\d+)(?:\/|$)/)
+  return match ? match[1] : undefined
+}
+const basename = ermittleBasename()
 
 function App() {
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-8">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Calvin</CardTitle>
-          <CardDescription>INNOQ Raumbuchungssystem</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">
-            Du kannst jetzt mit dem Aufbau der UI
-            beginnen.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+    <BuchungProvider>
+      <BrowserRouter basename={basename}>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/buchen/*" element={<BuchenPage />} />
+            <Route path="/buchungen" element={<MeineBuchungenPage />} />
+            <Route path="/buchungen/:id" element={<MeineBuchungenPage />} />
+            <Route path="/uebersicht" element={<UebersichtPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      <Toaster position="top-center" richColors />
+    </BuchungProvider>
   )
 }
 

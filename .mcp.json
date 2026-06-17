@@ -1,5 +1,5 @@
 {
- "mcpServers": {
+  "mcpServers": {
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
@@ -13,8 +13,7 @@
         "--isolated",
         "--executable-path",
         "/opt/playwright-browsers/chromium-1208/chrome-linux64/chrome"
-      ],
-      "env": {}
+      ]
     }
   }
 }

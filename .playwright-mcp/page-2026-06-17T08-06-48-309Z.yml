@@ -1,0 +1,163 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: C
+        - generic [ref=e8]: Calvin
+      - navigation [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+          - text: Dashboard
+        - link "Raum buchen" [ref=e14] [cursor=pointer]:
+          - /url: /buchen
+          - img [ref=e15]
+          - text: Raum buchen
+        - link "Meine Buchungen" [ref=e16] [cursor=pointer]:
+          - /url: /buchungen
+          - img [ref=e17]
+          - text: Meine Buchungen
+        - link "Übersicht" [ref=e19] [cursor=pointer]:
+          - /url: /uebersicht
+          - img [ref=e20]
+          - text: Übersicht
+      - generic [ref=e26]:
+        - img [ref=e27]
+        - generic [ref=e30]:
+          - text: "Dein Standort:"
+          - strong [ref=e31]: Köln
+    - generic [ref=e32]:
+      - banner [ref=e33]:
+        - generic [ref=e34]:
+          - button [ref=e35]:
+            - img [ref=e36]
+          - generic [ref=e40]:
+            - generic [ref=e42]: AB
+            - generic [ref=e43]: Alex Berger
+      - main [ref=e44]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - heading "Buchungsübersicht" [level=1] [ref=e49]
+              - paragraph [ref=e50]: Wer hat wann welchen Raum belegt? Freie Slots direkt buchen.
+            - generic [ref=e51]:
+              - combobox [ref=e52]:
+                - img
+                - generic [ref=e53]: Köln
+                - img: ▼
+              - textbox [ref=e54]: koeln
+              - combobox [ref=e55]:
+                - img
+                - generic [ref=e56]: Heute, 17. Jun
+                - img: ▼
+              - textbox [ref=e57]: 2026-06-17
+          - generic [ref=e60]:
+            - generic [ref=e63]:
+              - generic [ref=e64]: "8"
+              - generic [ref=e65]: "9"
+              - generic [ref=e66]: "10"
+              - generic [ref=e67]: "11"
+              - generic [ref=e68]: "12"
+              - generic [ref=e69]: "13"
+              - generic [ref=e70]: "14"
+              - generic [ref=e71]: "15"
+              - generic [ref=e72]: "16"
+              - generic [ref=e73]: "17"
+            - generic [ref=e74]:
+              - generic [ref=e75]:
+                - generic [ref=e76]:
+                  - generic [ref=e77]: Bergkristall
+                  - generic [ref=e78]: 4 Pers. · 2. OG
+                - generic [ref=e79]:
+                  - button "Frei — 8:00 buchen" [ref=e80] [cursor=pointer]
+                  - 'button "Belegt: Daily Standup" [disabled] [ref=e81]'
+                  - button "Frei — 10:00 buchen" [ref=e82] [cursor=pointer]
+                  - button "Frei — 11:00 buchen" [ref=e83] [cursor=pointer]
+                  - 'button "Belegt: Sprint Planning" [disabled] [ref=e84]'
+                  - 'button "Belegt: Sprint Planning" [disabled] [ref=e85]'
+                  - button "Frei — 14:00 buchen" [ref=e86] [cursor=pointer]
+                  - button "Frei — 15:00 buchen" [ref=e87] [cursor=pointer]
+                  - 'button "Belegt: Retro" [disabled] [ref=e88]'
+                  - button "Frei — 17:00 buchen" [ref=e89] [cursor=pointer]
+              - generic [ref=e90]:
+                - generic [ref=e91]:
+                  - generic [ref=e92]: Rheingold
+                  - generic [ref=e93]: 8 Pers. · 3. OG
+                - generic [ref=e94]:
+                  - button "Frei — 8:00 buchen" [ref=e95] [cursor=pointer]
+                  - button "Frei — 9:00 buchen" [ref=e96] [cursor=pointer]
+                  - button "Frei — 10:00 buchen" [ref=e97] [cursor=pointer]
+                  - 'button "Belegt: Architektur-Review" [disabled] [ref=e98]'
+                  - 'button "Belegt: Architektur-Review" [disabled] [ref=e99]'
+                  - button "Frei — 13:00 buchen" [ref=e100] [cursor=pointer]
+                  - button "Frei — 14:00 buchen" [ref=e101] [cursor=pointer]
+                  - 'button "Belegt: 1:1" [disabled] [ref=e102]'
+                  - button "Frei — 16:00 buchen" [ref=e103] [cursor=pointer]
+                  - button "Frei — 17:00 buchen" [ref=e104] [cursor=pointer]
+              - generic [ref=e105]:
+                - generic [ref=e106]:
+                  - generic [ref=e107]: Mosel
+                  - generic [ref=e108]: 10 Pers. · EG
+                - generic [ref=e109]:
+                  - button "Frei — 8:00 buchen" [ref=e110] [cursor=pointer]
+                  - 'button "Belegt: Kundenworkshop ACME" [disabled] [ref=e111]'
+                  - 'button "Belegt: Kundenworkshop ACME" [disabled] [ref=e112]'
+                  - 'button "Belegt: Kundenworkshop ACME" [disabled] [ref=e113]'
+                  - 'button "Belegt: Kundenworkshop ACME" [disabled] [ref=e114]'
+                  - button "Frei — 13:00 buchen" [ref=e115] [cursor=pointer]
+                  - 'button "Belegt: Vertriebsmeeting" [disabled] [ref=e116]'
+                  - button "Frei — 15:00 buchen" [ref=e117] [cursor=pointer]
+                  - button "Frei — 16:00 buchen" [ref=e118] [cursor=pointer]
+                  - button "Frei — 17:00 buchen" [ref=e119] [cursor=pointer]
+              - generic [ref=e120]:
+                - generic [ref=e121]:
+                  - generic [ref=e122]: Spessart
+                  - generic [ref=e123]: 2 Pers. · 2. OG
+                - generic [ref=e124]:
+                  - button "Frei — 8:00 buchen" [ref=e125] [cursor=pointer]
+                  - 'button "Belegt: Remote-Call" [disabled] [ref=e126]'
+                  - 'button "Belegt: Remote-Call" [disabled] [ref=e127]'
+                  - button "Frei — 11:00 buchen" [ref=e128] [cursor=pointer]
+                  - button "Frei — 12:00 buchen" [ref=e129] [cursor=pointer]
+                  - button "Frei — 13:00 buchen" [ref=e130] [cursor=pointer]
+                  - button "Frei — 14:00 buchen" [ref=e131] [cursor=pointer]
+                  - 'button "Belegt: Kundengespräch" [disabled] [ref=e132]'
+                  - 'button "Belegt: Kundengespräch" [disabled] [ref=e133]'
+                  - button "Frei — 17:00 buchen" [ref=e134] [cursor=pointer]
+              - generic [ref=e135]:
+                - generic [ref=e136]:
+                  - generic [ref=e137]: Eifel
+                  - generic [ref=e138]: 6 Pers. · 3. OG
+                - generic [ref=e139]:
+                  - button "Frei — 8:00 buchen" [ref=e140] [cursor=pointer]
+                  - button "Frei — 9:00 buchen" [ref=e141] [cursor=pointer]
+                  - button "Frei — 10:00 buchen" [ref=e142] [cursor=pointer]
+                  - button "Frei — 11:00 buchen" [ref=e143] [cursor=pointer]
+                  - button "Frei — 12:00 buchen" [ref=e144] [cursor=pointer]
+                  - 'button "Belegt: Refinement" [disabled] [ref=e145]'
+                  - button "Frei — 14:00 buchen" [ref=e146] [cursor=pointer]
+                  - button "Frei — 15:00 buchen" [ref=e147] [cursor=pointer]
+                  - button "Frei — 16:00 buchen" [ref=e148] [cursor=pointer]
+                  - button "Frei — 17:00 buchen" [ref=e149] [cursor=pointer]
+              - generic [ref=e150]:
+                - generic [ref=e151]:
+                  - generic [ref=e152]: Ahr
+                  - generic [ref=e153]: 4 Pers. · EG
+                - generic [ref=e154]:
+                  - button "Frei — 8:00 buchen" [ref=e155] [cursor=pointer]
+                  - button "Frei — 9:00 buchen" [ref=e156] [cursor=pointer]
+                  - 'button "Belegt: Pairing" [disabled] [ref=e157]'
+                  - button "Frei — 11:00 buchen" [ref=e158] [cursor=pointer]
+                  - button "Frei — 12:00 buchen" [ref=e159] [cursor=pointer]
+                  - button "Frei — 13:00 buchen" [ref=e160] [cursor=pointer]
+                  - button "Frei — 14:00 buchen" [ref=e161] [cursor=pointer]
+                  - button "Frei — 15:00 buchen" [ref=e162] [cursor=pointer]
+                  - button "Frei — 16:00 buchen" [ref=e163] [cursor=pointer]
+                  - button "Frei — 17:00 buchen" [ref=e164] [cursor=pointer]
+          - generic [ref=e165]:
+            - generic [ref=e166]: Frei
+            - generic [ref=e168]: Belegt
+            - generic [ref=e170]:
+              - img [ref=e171]
+              - text: Klicke auf einen freien Slot, um ihn am heutigen Tag zu buchen.
+  - region "Notifications alt+T"

@@ -1,0 +1,108 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: C
+        - generic [ref=e8]: Calvin
+      - navigation [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+          - text: Dashboard
+        - link "Raum buchen" [ref=e14] [cursor=pointer]:
+          - /url: /buchen
+          - img [ref=e15]
+          - text: Raum buchen
+        - link "Meine Buchungen" [ref=e16] [cursor=pointer]:
+          - /url: /buchungen
+          - img [ref=e17]
+          - text: Meine Buchungen
+        - link "Übersicht" [ref=e19] [cursor=pointer]:
+          - /url: /uebersicht
+          - img [ref=e20]
+          - text: Übersicht
+      - generic [ref=e26]:
+        - img [ref=e27]
+        - generic [ref=e30]:
+          - text: "Dein Standort:"
+          - strong [ref=e31]: Köln
+    - generic [ref=e32]:
+      - banner [ref=e33]:
+        - generic [ref=e34]:
+          - button [ref=e35]:
+            - img [ref=e36]
+          - generic [ref=e40]:
+            - generic [ref=e42]: AB
+            - generic [ref=e43]: Alex Berger
+      - main [ref=e44]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - heading "Meine Buchungen" [level=1] [ref=e49]
+              - paragraph [ref=e50]: Alle deine Raumbuchungen im Überblick.
+            - button "Neue Buchung" [ref=e51]:
+              - img
+              - text: Neue Buchung
+          - generic [ref=e52]:
+            - tablist [ref=e53]:
+              - tab "Bevorstehend (3)" [selected] [ref=e54]
+              - tab "Vergangen (2)" [ref=e55]
+            - tabpanel "Bevorstehend (3)" [ref=e56]:
+              - generic [ref=e58]:
+                - generic [ref=e59]:
+                  - generic [ref=e60]:
+                    - generic [ref=e61]:
+                      - img [ref=e62]
+                      - text: Heute · 14:00–15:30
+                    - generic [ref=e65]:
+                      - img
+                      - text: Bestätigt
+                  - generic [ref=e66]: Bergkristall
+                  - generic [ref=e67]:
+                    - generic [ref=e68]:
+                      - img [ref=e69]
+                      - text: Köln
+                    - generic [ref=e72]: „Q3 Planungsmeeting"
+                - generic [ref=e73]:
+                  - button "Details" [ref=e74]
+                  - button [ref=e75]:
+                    - img
+              - generic [ref=e77]:
+                - generic [ref=e78]:
+                  - generic [ref=e79]:
+                    - generic [ref=e80]:
+                      - img [ref=e81]
+                      - text: 22. Jun · 10:00–12:00
+                    - generic [ref=e84]:
+                      - img
+                      - text: Bestätigt
+                  - generic [ref=e85]: Elbe
+                  - generic [ref=e86]:
+                    - generic [ref=e87]:
+                      - img [ref=e88]
+                      - text: Hamburg
+                    - generic [ref=e91]: „Kundenworkshop"
+                - generic [ref=e92]:
+                  - button "Details" [ref=e93]
+                  - button [ref=e94]:
+                    - img
+              - generic [ref=e96]:
+                - generic [ref=e97]:
+                  - generic [ref=e98]:
+                    - generic [ref=e99]:
+                      - img [ref=e100]
+                      - text: 24. Jun · 09:00–10:30
+                    - generic [ref=e103]:
+                      - img
+                      - text: Bestätigt
+                  - generic [ref=e104]: Rheingold
+                  - generic [ref=e105]:
+                    - generic [ref=e106]:
+                      - img [ref=e107]
+                      - text: Köln
+                    - generic [ref=e110]: „Architektur-Sync"
+                - generic [ref=e111]:
+                  - button "Details" [ref=e112]
+                  - button [ref=e113]:
+                    - img
+  - region "Notifications alt+T"

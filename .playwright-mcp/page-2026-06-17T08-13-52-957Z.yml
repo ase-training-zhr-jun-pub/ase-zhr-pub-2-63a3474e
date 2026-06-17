@@ -1,0 +1,117 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - generic [ref=e7]:
+          - generic [ref=e8]: C
+          - generic [ref=e9]: Calvin
+        - generic [ref=e10]:
+          - button [ref=e11]:
+            - img [ref=e12]
+          - generic [ref=e18]: AB
+      - main [ref=e19]:
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - heading "Guten Morgen, Alex!" [level=1] [ref=e23]
+            - paragraph [ref=e24]: Mi, 17. Jun 2026
+          - generic [ref=e25]:
+            - generic [ref=e27]:
+              - img [ref=e28]
+              - text: Raum schnell buchen
+            - generic [ref=e32]:
+              - generic [ref=e33]:
+                - text: Standort
+                - combobox [ref=e34]:
+                  - img
+                  - generic [ref=e35]: Köln
+                  - img: ▼
+                - textbox [ref=e36]: koeln
+              - generic [ref=e37]:
+                - text: Von
+                - combobox [ref=e38]:
+                  - img
+                  - generic [ref=e39]: 09:00
+                  - img: ▼
+                - textbox [ref=e40]: 09:00
+              - generic [ref=e41]:
+                - text: Bis
+                - combobox [ref=e42]:
+                  - img
+                  - generic [ref=e43]: 10:00
+                  - img: ▼
+                - textbox [ref=e44]: 10:00
+              - button "Verfügbare Räume" [ref=e45]:
+                - text: Verfügbare Räume
+                - img
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - heading "Meine nächsten Buchungen" [level=2] [ref=e48]:
+                - img [ref=e49]
+                - text: Meine nächsten Buchungen
+              - button "Alle ansehen" [ref=e52]
+            - generic [ref=e53]:
+              - generic [ref=e55] [cursor=pointer]:
+                - generic [ref=e56]:
+                  - img [ref=e57]
+                  - text: Heute · 14:00–15:30
+                - generic [ref=e60]: Bergkristall
+                - generic [ref=e61]:
+                  - img [ref=e62]
+                  - text: Köln
+                - generic [ref=e65]: „Q3 Planungsmeeting"
+              - generic [ref=e67] [cursor=pointer]:
+                - generic [ref=e68]:
+                  - img [ref=e69]
+                  - text: 22. Jun · 10:00–12:00
+                - generic [ref=e72]: Elbe
+                - generic [ref=e73]:
+                  - img [ref=e74]
+                  - text: Hamburg
+                - generic [ref=e77]: „Kundenworkshop"
+              - generic [ref=e79] [cursor=pointer]:
+                - generic [ref=e80]:
+                  - img [ref=e81]
+                  - text: 24. Jun · 09:00–10:30
+                - generic [ref=e84]: Rheingold
+                - generic [ref=e85]:
+                  - img [ref=e86]
+                  - text: Köln
+                - generic [ref=e89]: „Architektur-Sync"
+          - generic [ref=e90]:
+            - heading "Wer ist heute in Köln?" [level=2] [ref=e91]:
+              - img [ref=e92]
+              - text: Wer ist heute in Köln?
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e102]: PM
+                - generic [ref=e103]: Petra Müller
+              - generic [ref=e104]:
+                - generic [ref=e106]: JK
+                - generic [ref=e107]: Jonas Klein
+              - generic [ref=e108]:
+                - generic [ref=e110]: SW
+                - generic [ref=e111]: Sarah Wagner
+              - generic [ref=e112]:
+                - generic [ref=e114]: TB
+                - generic [ref=e115]: Tim Becker
+              - generic [ref=e116]:
+                - generic [ref=e118]: LH
+                - generic [ref=e119]: Lena Hoffmann
+    - navigation [ref=e120]:
+      - link "Dashboard" [ref=e121] [cursor=pointer]:
+        - /url: /
+        - img [ref=e122]
+        - text: Dashboard
+      - link "Raum" [ref=e125] [cursor=pointer]:
+        - /url: /buchen
+        - img [ref=e126]
+        - text: Raum
+      - link "Meine" [ref=e127] [cursor=pointer]:
+        - /url: /buchungen
+        - img [ref=e128]
+        - text: Meine
+      - link "Übersicht" [ref=e130] [cursor=pointer]:
+        - /url: /uebersicht
+        - img [ref=e131]
+        - text: Übersicht
+  - region "Notifications alt+T"
