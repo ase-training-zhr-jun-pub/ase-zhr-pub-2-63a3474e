@@ -64,6 +64,17 @@ export interface Kollege {
   standortId: string
 }
 
+// Grund der Anwesenheit: entweder selbst angekündigt (signalisiert, CLVN-038) oder
+// aus einer bestehenden Raumbuchung am Standort abgeleitet.
+export type AnwesenheitsGrund = "signalisiert" | "raumbuchung"
+
+export interface Anwesenheit {
+  kollege: Kollege
+  grund: AnwesenheitsGrund
+  /** Markiert die eigene Anwesenheit des aktuellen Nutzers. */
+  istIchSelbst: boolean
+}
+
 // --- Standorte (alle 8 INNOQ-Standorte) ---
 
 export const standorte: Standort[] = [
@@ -355,25 +366,36 @@ export const raeume: Raum[] = [
 
 export const HEUTE = "2026-06-17"
 
-// --- Kollegen im Büro (Persona-Need: Wer ist heute da?) ---
+// --- Kollegen (Stammdaten) ---
 
-export const kollegenHeute: Record<string, Kollege[]> = {
-  koeln: [
-    { id: "k1", name: "Petra Müller", initialen: "PM", standortId: "koeln" },
-    { id: "k2", name: "Jonas Klein", initialen: "JK", standortId: "koeln" },
-    { id: "k3", name: "Sarah Wagner", initialen: "SW", standortId: "koeln" },
-    { id: "k4", name: "Tim Becker", initialen: "TB", standortId: "koeln" },
-    { id: "k5", name: "Lena Hoffmann", initialen: "LH", standortId: "koeln" },
-  ],
-  hamburg: [
-    { id: "k6", name: "Max Schulz", initialen: "MS", standortId: "hamburg" },
-    { id: "k7", name: "Nina Brandt", initialen: "NB", standortId: "hamburg" },
-  ],
-  berlin: [
-    { id: "k8", name: "Felix Wolf", initialen: "FW", standortId: "berlin" },
-    { id: "k9", name: "Clara Vogel", initialen: "CV", standortId: "berlin" },
-    { id: "k10", name: "David Krüger", initialen: "DK", standortId: "berlin" },
-  ],
+export const kollegen: Kollege[] = [
+  { id: "k1", name: "Petra Müller", initialen: "PM", standortId: "koeln" },
+  { id: "k2", name: "Jonas Klein", initialen: "JK", standortId: "koeln" },
+  { id: "k3", name: "Sarah Wagner", initialen: "SW", standortId: "koeln" },
+  { id: "k4", name: "Tim Becker", initialen: "TB", standortId: "koeln" },
+  { id: "k5", name: "Lena Hoffmann", initialen: "LH", standortId: "koeln" },
+  { id: "k6", name: "Max Schulz", initialen: "MS", standortId: "hamburg" },
+  { id: "k7", name: "Nina Brandt", initialen: "NB", standortId: "hamburg" },
+  { id: "k8", name: "Felix Wolf", initialen: "FW", standortId: "berlin" },
+  { id: "k9", name: "Clara Vogel", initialen: "CV", standortId: "berlin" },
+  { id: "k10", name: "David Krüger", initialen: "DK", standortId: "berlin" },
+  { id: "k11", name: "Anja Roth", initialen: "AR", standortId: "muenchen" },
+  { id: "k12", name: "Bernd Lang", initialen: "BL", standortId: "muenchen" },
+  { id: "k13", name: "Sofia Reim", initialen: "SR", standortId: "zuerich" },
+]
+
+// --- Signalisierte Anwesenheit (CLVN-038): wer hat sich für welchen Tag an welchem
+// Standort angekündigt? Gemockt für die nächsten Tage rund um HEUTE. Schlüssel: ISO-Datum.
+// Werte: Kollegen-IDs. Datenschutzkonform sparsam — nur die ID, kein Profil. ---
+
+const signalisierteAnwesenheit: Record<string, string[]> = {
+  // Heute (2026-06-17)
+  "2026-06-17": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
+  // Morgen — der aktuelle Nutzer (Alex Berger, Köln) ist selbst angekündigt
+  "2026-06-18": ["ich", "k1", "k3", "k6", "k11"],
+  "2026-06-19": ["k2", "k4", "k9", "k13"],
+  "2026-06-22": ["ich", "k1", "k2", "k8", "k12"],
+  "2026-06-23": ["k5", "k7", "k10"],
 }
 
 // --- Aktueller Nutzer ---
@@ -398,6 +420,86 @@ export function getRaum(id: string): Raum | undefined {
 export function getRaeumeByStandort(standortId: string): Raum[] {
   return raeume.filter((r) => r.standortId === standortId)
 }
+
+export function getKollege(id: string): Kollege | undefined {
+  return kollegen.find((k) => k.id === id)
+}
+
+// Repräsentiert den aktuellen Nutzer als Kollege (für die Anwesenheitsliste).
+const ICH_ID = "ich"
+function nutzerAlsKollege(): Kollege {
+  return {
+    id: ICH_ID,
+    name: aktuellerNutzer.name,
+    initialen: aktuellerNutzer.initialen,
+    standortId: aktuellerNutzer.standortId,
+  }
+}
+
+/**
+ * Ermittelt die anwesenden Kollegen für einen Standort an einem Datum (CLVN-037).
+ *
+ * Grundlage sind (a) die signalisierte Anwesenheit für den Tag (CLVN-038) gefiltert auf
+ * den Standort sowie (b) bestehende Raumbuchungen am Standort/Tag, aus denen sich eine
+ * Anwesenheit der buchenden Person ableiten lässt. Datenschutzkonform werden nur Name
+ * und Anwesenheitsgrund zurückgegeben.
+ */
+export function anwesenheitFuer(
+  standortId: string,
+  datum: string,
+  buchungen: Buchung[] = []
+): Anwesenheit[] {
+  const ergebnis = new Map<string, Anwesenheit>()
+
+  function kollegeFuerId(id: string): Kollege | undefined {
+    return id === ICH_ID ? nutzerAlsKollege() : getKollege(id)
+  }
+
+  // (a) Signalisierte Anwesenheit für den Tag, gefiltert auf den Standort.
+  for (const id of signalisierteAnwesenheit[datum] ?? []) {
+    const k = kollegeFuerId(id)
+    if (!k || k.standortId !== standortId) continue
+    ergebnis.set(k.id, {
+      kollege: k,
+      grund: "signalisiert",
+      istIchSelbst: k.id === ICH_ID,
+    })
+  }
+
+  // (b) Anwesenheit aus bestehenden Raumbuchungen am Standort/Tag ableiten.
+  for (const b of buchungen) {
+    if (b.standortId !== standortId || b.datum !== datum || b.status !== "bestätigt") continue
+    const istIch = b.gebuchtVon === aktuellerNutzer.name
+    const k = istIch
+      ? nutzerAlsKollege()
+      : kollegen.find((kol) => kol.name === b.gebuchtVon)
+    if (!k) continue
+    // Signalisierte Anwesenheit (a) hat Vorrang und bleibt erhalten.
+    if (ergebnis.has(k.id)) continue
+    ergebnis.set(k.id, {
+      kollege: k,
+      grund: "raumbuchung",
+      istIchSelbst: istIch,
+    })
+  }
+
+  // Eigene Anwesenheit zuerst, sonst alphabetisch nach Name.
+  return [...ergebnis.values()].sort((a, b) => {
+    if (a.istIchSelbst !== b.istIchSelbst) return a.istIchSelbst ? -1 : 1
+    return a.kollege.name.localeCompare(b.kollege.name, "de")
+  })
+}
+
+// Rückwärtskompatibler Helfer für das Dashboard („Wer ist heute da?"). Liefert die
+// anwesenden Kollegen am heutigen Tag, ohne den aktuellen Nutzer selbst.
+export const kollegenHeute: Record<string, Kollege[]> = Object.fromEntries(
+  standorte.map((s) => [
+    s.id,
+    anwesenheitFuer(s.id, HEUTE)
+      .filter((a) => !a.istIchSelbst)
+      .map((a) => a.kollege),
+  ])
+)
 
 // Filtert eine (vom Backend geladene) Belegungsliste auf einen Raum/Tag.
 export function belegungenFuerRaum(

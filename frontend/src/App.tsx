@@ -7,6 +7,7 @@ import { DashboardPage } from "@/pages/dashboard"
 import { BuchenPage } from "@/pages/buchen"
 import { MeineBuchungenPage } from "@/pages/meine-buchungen"
 import { UebersichtPage } from "@/pages/uebersicht"
+import { AnwesenheitPage } from "@/pages/anwesenheit"
 
 // basename für den Betrieb hinter dem Crucible-Proxy zur Laufzeit aus der
 // Browser-URL ableiten. Der Proxy-Pfad (…/proxy/<port>) bleibt in der Adresszeile
@@ -31,6 +32,7 @@ function App() {
               <Route path="/buchungen" element={<MeineBuchungenPage />} />
               <Route path="/buchungen/:id" element={<MeineBuchungenPage />} />
               <Route path="/uebersicht" element={<UebersichtPage />} />
+              <Route path="/anwesenheit" element={<AnwesenheitPage />} />
             </Route>
           </Routes>
         </BrowserRouter>
