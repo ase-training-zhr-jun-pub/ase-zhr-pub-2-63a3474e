@@ -1,9 +1,9 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom"
 import { Home, Plus, CalendarDays, LayoutGrid, MapPin } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { BenachrichtigungenGlocke } from "@/components/benachrichtigungen-glocke"
 import { cn } from "@/lib/utils"
 import { aktuellerNutzer, getStandort } from "@/lib/mock-data"
-import { Benachrichtigungen } from "@/components/benachrichtigungen"
 
 interface NavItem {
   to: string
@@ -82,7 +82,7 @@ export function AppLayout() {
           </div>
           <div className="hidden md:block" />
           <div className="flex items-center gap-3">
-            <Benachrichtigungen />
+            <BenachrichtigungenGlocke />
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">

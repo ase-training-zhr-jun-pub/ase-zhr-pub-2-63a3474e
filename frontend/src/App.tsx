@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { AppLayout } from "@/components/app-layout"
 import { BuchungProvider } from "@/lib/buchung-context"
+import { BenachrichtigungProvider } from "@/lib/benachrichtigung-context"
 import { Toaster } from "@/components/ui/sonner"
 import { DashboardPage } from "@/pages/dashboard"
 import { BuchenPage } from "@/pages/buchen"
@@ -21,18 +22,20 @@ const basename = ermittleBasename()
 function App() {
   return (
     <BuchungProvider>
-      <BrowserRouter basename={basename}>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/buchen/*" element={<BuchenPage />} />
-            <Route path="/buchungen" element={<MeineBuchungenPage />} />
-            <Route path="/buchungen/:id" element={<MeineBuchungenPage />} />
-            <Route path="/uebersicht" element={<UebersichtPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-      <Toaster position="top-center" richColors />
+      <BenachrichtigungProvider>
+        <BrowserRouter basename={basename}>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/buchen/*" element={<BuchenPage />} />
+              <Route path="/buchungen" element={<MeineBuchungenPage />} />
+              <Route path="/buchungen/:id" element={<MeineBuchungenPage />} />
+              <Route path="/uebersicht" element={<UebersichtPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+        <Toaster position="top-center" richColors />
+      </BenachrichtigungProvider>
     </BuchungProvider>
   )
 }
