@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CalendarPlus,
   LayoutGrid,
+  Repeat,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,9 +19,18 @@ export function SchrittBestaetigung() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const id = params.get("id")
+  const serie = params.get("serie")
   const { buchungen, entwurfZuruecksetzen } = useBuchung()
 
-  const buchung = buchungen.find((b) => b.id === id)
+  // Serientermin-Bestätigung: alle Einzeltermine der Serie, chronologisch.
+  const serienBuchungen = serie
+    ? buchungen
+        .filter((b) => b.serienId === serie)
+        .sort((a, b) => a.datum.localeCompare(b.datum))
+    : []
+  const ersteBuchung = serienBuchungen[0]
+
+  const buchung = serie ? ersteBuchung : buchungen.find((b) => b.id === id)
 
   useEffect(() => {
     // Entwurf nach erfolgreicher Buchung zurücksetzen
@@ -32,6 +42,7 @@ export function SchrittBestaetigung() {
     return <Navigate to="/buchen" replace />
   }
 
+  const istSerie = !!serie && serienBuchungen.length > 0
   const raum = getRaum(buchung.raumId)!
   const standort = getStandort(buchung.standortId)!
 
@@ -44,9 +55,13 @@ export function SchrittBestaetigung() {
               <CheckCircle2 className="h-9 w-9 text-emerald-600" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold">Buchung bestätigt!</h1>
+              <h1 className="text-xl font-semibold">
+                {istSerie ? "Serie bestätigt!" : "Buchung bestätigt!"}
+              </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Dein Raum ist verbindlich reserviert.
+                {istSerie
+                  ? `${serienBuchungen.length} Termine sind verbindlich reserviert.`
+                  : "Dein Raum ist verbindlich reserviert."}
               </p>
             </div>
           </div>
@@ -61,13 +76,24 @@ export function SchrittBestaetigung() {
                 {standort.name} · {raum.etage}
               </div>
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                {formatDatum(buchung.datum)}
-              </div>
-              <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 {buchung.zeitfenster.start}–{buchung.zeitfenster.ende} Uhr
               </div>
+              {istSerie ? (
+                <div className="flex items-start gap-2">
+                  <Repeat className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                  <div className="space-y-1">
+                    {serienBuchungen.map((b) => (
+                      <div key={b.id}>{formatDatum(b.datum)}</div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                  {formatDatum(buchung.datum)}
+                </div>
+              )}
             </div>
           </div>
 

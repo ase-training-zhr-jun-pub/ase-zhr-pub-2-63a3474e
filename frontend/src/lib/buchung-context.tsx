@@ -1,6 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { aktuellerNutzer, type Buchung } from "@/lib/mock-data"
-import { getBuchungen, storniereBuchung } from "@/lib/buchungen-api"
+import { getBuchungen, storniereBuchung, storniereSerie } from "@/lib/buchungen-api"
+
+// Wiederholungsrhythmus eines Serientermins (CLVN-031)
+export type Wiederholung = "keine" | "woechentlich" | "zweiwoechentlich"
+
+// Wie das Ende der Serie festgelegt wird: per Anzahl der Termine oder per Enddatum.
+export type SerienEndeArt = "anzahl" | "enddatum"
 
 // Entwurf einer Buchung während des Wizard-Flows
 export interface BuchungsEntwurf {
@@ -11,6 +17,11 @@ export interface BuchungsEntwurf {
   raumId?: string
   titel?: string
   notiz?: string
+  // Serientermin-Einstellungen (CLVN-031)
+  wiederholung?: Wiederholung
+  serienEndeArt?: SerienEndeArt
+  serienAnzahl?: number
+  serienEnddatum?: string
 }
 
 interface BuchungContextValue {
@@ -20,7 +31,9 @@ interface BuchungContextValue {
   buchungen: Buchung[]
   ladenLaeuft: boolean
   buchungHinzufuegen: (b: Buchung) => void
+  buchungenHinzufuegen: (bs: Buchung[]) => void
   buchungStornieren: (id: string) => Promise<void>
+  serieStornieren: (serienId: string) => Promise<void>
   buchungenNeuLaden: () => Promise<void>
 }
 
@@ -54,9 +67,23 @@ export function BuchungProvider({ children }: { children: React.ReactNode }) {
   const buchungHinzufuegen = (b: Buchung) =>
     setBuchungen((prev) => [b, ...prev.filter((x) => x.id !== b.id)])
 
+  // Mehrere Buchungen (z. B. eine Serie) auf einmal in den State übernehmen.
+  const buchungenHinzufuegen = (bs: Buchung[]) =>
+    setBuchungen((prev) => {
+      const neueIds = new Set(bs.map((b) => b.id))
+      return [...bs, ...prev.filter((x) => !neueIds.has(x.id))]
+    })
+
   const buchungStornieren = async (id: string) => {
     const aktualisiert = await storniereBuchung(id)
     setBuchungen((prev) => prev.map((b) => (b.id === id ? aktualisiert : b)))
+  }
+
+  // Alle Einzeltermine einer Serie auf einmal stornieren (CLVN-031).
+  const serieStornieren = async (serienId: string) => {
+    const aktualisiert = await storniereSerie(buchungen, serienId)
+    const byId = new Map(aktualisiert.map((b) => [b.id, b]))
+    setBuchungen((prev) => prev.map((b) => byId.get(b.id) ?? b))
   }
 
   return (
@@ -68,7 +95,9 @@ export function BuchungProvider({ children }: { children: React.ReactNode }) {
         buchungen,
         ladenLaeuft,
         buchungHinzufuegen,
+        buchungenHinzufuegen,
         buchungStornieren,
+        serieStornieren,
         buchungenNeuLaden,
       }}
     >

@@ -52,6 +52,9 @@ export interface Buchung {
   notiz?: string
   status: BuchungsStatus
   gebuchtVon: string
+  // Gehört die Buchung zu einem Serientermin (CLVN-031), tragen alle Einzeltermine
+  // dieselbe serienId. Einzelbuchungen lassen das Feld leer.
+  serienId?: string
 }
 
 export interface Kollege {
@@ -459,4 +462,20 @@ export function formatDatumKurz(iso: string): string {
 
 export function istHeute(iso: string): boolean {
   return iso === HEUTE
+}
+
+// --- Datums-Helfer für Serientermine (CLVN-031) ---
+
+// Addiert eine Anzahl Tage auf ein ISO-Datum und gibt wieder ISO zurück.
+export function addTage(iso: string, tage: number): string {
+  const [jahr, monat, tag] = iso.split("-").map(Number)
+  const d = new Date(jahr, monat - 1, tag + tage)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`
+}
+
+// Vergleicht zwei ISO-Daten (a < b → negativ, a > b → positiv).
+export function vergleicheDatum(a: string, b: string): number {
+  return a.localeCompare(b)
 }

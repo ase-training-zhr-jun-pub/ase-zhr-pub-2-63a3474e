@@ -16,6 +16,8 @@ export interface NeueBuchungAnfrage {
   titel: string
   notiz?: string
   gebuchtVon: string
+  // Optional: kennzeichnet die Buchung als Teil eines Serientermins (CLVN-031).
+  serienId?: string
 }
 
 interface BuchungFilter {
@@ -97,4 +99,117 @@ export async function storniereBuchung(id: string): Promise<Buchung> {
   })
   if (!res.ok) throw new Error(`Stornierung fehlgeschlagen (HTTP ${res.status})`)
   return res.json()
+}
+
+// --- Serientermine (CLVN-031) ---
+
+/** Ein Einzeltermin einer geplanten Serie mit dem Ergebnis der Verfügbarkeitsprüfung. */
+export interface SerienTermin {
+  datum: string // ISO "YYYY-MM-DD"
+  start: string
+  ende: string
+  /** false, wenn der Raum an diesem Termin bereits belegt ist (Konflikt). */
+  frei: boolean
+  /** Titel der kollidierenden Buchung, falls belegt. */
+  konfliktTitel?: string
+}
+
+/**
+ * Prüft jeden vorgeschlagenen Einzeltermin einer Serie auf Verfügbarkeit des
+ * Konferenzraums (Akzeptanzkriterium: jeder Termin wird separat geprüft, QS-1).
+ *
+ * Lädt dazu die bestätigten Buchungen des Raums und vergleicht die Zeitfenster.
+ */
+export async function pruefeSerienVerfuegbarkeit(
+  raumId: string,
+  termine: { datum: string; start: string; ende: string }[]
+): Promise<SerienTermin[]> {
+  const buchungen = (await getBuchungen({ raumId })).filter(
+    (b) => b.status === "bestätigt"
+  )
+  return termine.map((t) => {
+    const kollision = buchungen.find(
+      (b) =>
+        b.datum === t.datum &&
+        t.start < b.zeitfenster.ende &&
+        t.ende > b.zeitfenster.start
+    )
+    return {
+      ...t,
+      frei: !kollision,
+      konfliktTitel: kollision?.titel,
+    }
+  })
+}
+
+export interface SerienBuchungAnfrage {
+  raumId: string
+  standortId: string
+  titel: string
+  notiz?: string
+  gebuchtVon: string
+  termine: { datum: string; start: string; ende: string }[]
+}
+
+/** Ergebnis einer Serienbuchung: erfolgreich angelegte und fehlgeschlagene Termine. */
+export interface SerienBuchungErgebnis {
+  serienId: string
+  gebucht: Buchung[]
+  fehlgeschlagen: { datum: string; grund: string }[]
+}
+
+/**
+ * Legt mehrere Einzeltermine als zusammengehörige Serie an. Alle Buchungen erhalten
+ * dieselbe serienId. Schlägt ein Einzeltermin fehl (z. B. zwischenzeitlich belegt),
+ * werden die übrigen trotzdem gebucht (best effort) und der Fehler gemeldet.
+ */
+export async function createSerie(
+  anfrage: SerienBuchungAnfrage
+): Promise<SerienBuchungErgebnis> {
+  const serienId = `serie-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const gebucht: Buchung[] = []
+  const fehlgeschlagen: { datum: string; grund: string }[] = []
+
+  for (const t of anfrage.termine) {
+    try {
+      const buchung = await createBuchung({
+        raumId: anfrage.raumId,
+        standortId: anfrage.standortId,
+        datum: t.datum,
+        start: t.start,
+        ende: t.ende,
+        titel: anfrage.titel,
+        notiz: anfrage.notiz,
+        gebuchtVon: anfrage.gebuchtVon,
+        serienId,
+      })
+      gebucht.push(buchung)
+    } catch (e) {
+      const grund =
+        e instanceof RaumBereitsBelegtError
+          ? "Raum zwischenzeitlich belegt"
+          : "Buchung fehlgeschlagen"
+      fehlgeschlagen.push({ datum: t.datum, grund })
+    }
+  }
+
+  return { serienId, gebucht, fehlgeschlagen }
+}
+
+/**
+ * Storniert alle (noch bestätigten) Termine einer Serie in einem Schritt (CLVN-031).
+ * Gibt die aktualisierten Buchungen zurück.
+ */
+export async function storniereSerie(
+  buchungen: Buchung[],
+  serienId: string
+): Promise<Buchung[]> {
+  const zuStornieren = buchungen.filter(
+    (b) => b.serienId === serienId && b.status === "bestätigt"
+  )
+  const ergebnisse: Buchung[] = []
+  for (const b of zuStornieren) {
+    ergebnisse.push(await storniereBuchung(b.id))
+  }
+  return ergebnisse
 }
