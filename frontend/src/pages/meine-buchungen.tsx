@@ -11,6 +11,7 @@ import {
   StickyNote,
   CheckCircle2,
   XCircle,
+  Repeat,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -80,6 +81,12 @@ function BuchungsKarte({
               {buchung.zeitfenster.start}–{buchung.zeitfenster.ende}
             </span>
             <StatusBadge status={buchung.status} />
+            {buchung.serienId && (
+              <Badge variant="outline" className="gap-1 font-normal text-muted-foreground">
+                <Repeat className="h-3 w-3" />
+                Serie
+              </Badge>
+            )}
           </div>
           <div className="text-base font-semibold">{raum?.name}</div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -113,11 +120,12 @@ function BuchungsKarte({
 export function MeineBuchungenPage() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { buchungen, buchungStornieren } = useBuchung()
+  const { buchungen, buchungStornieren, serieStornieren } = useBuchung()
   const { stornoBenachrichtigung } = useBenachrichtigung()
 
   const [detailId, setDetailId] = useState<string | null>(id ?? null)
   const [stornoId, setStornoId] = useState<string | null>(null)
+  const [serienStornoId, setSerienStornoId] = useState<string | null>(null)
 
   const bevorstehend = buchungen
     .filter((b) => b.datum >= HEUTE)
@@ -129,6 +137,24 @@ export function MeineBuchungenPage() {
   const detailBuchung = buchungen.find((b) => b.id === detailId)
   const detailRaum = detailBuchung ? getRaum(detailBuchung.raumId) : undefined
   const detailStandort = detailBuchung ? getStandort(detailBuchung.standortId) : undefined
+
+  // Anzahl noch bestätigter (zukünftiger) Termine der Serie der aktuell offenen Buchung.
+  const detailSerienAktiv =
+    detailBuchung?.serienId
+      ? buchungen.filter(
+          (b) =>
+            b.serienId === detailBuchung.serienId &&
+            b.status === "bestätigt" &&
+            b.datum >= HEUTE
+        ).length
+      : 0
+
+  // Anzahl noch bestätigter Termine der zu stornierenden Serie (für den Dialogtext).
+  const serienStornoAnzahl = serienStornoId
+    ? buchungen.filter(
+        (b) => b.serienId === serienStornoId && b.status === "bestätigt"
+      ).length
+    : 0
 
   function teilen(b: Buchung) {
     const raum = getRaum(b.raumId)
@@ -148,6 +174,18 @@ export function MeineBuchungenPage() {
       setDetailId(null)
     } catch {
       toast.error("Die Buchung konnte nicht storniert werden. Bitte versuche es erneut.")
+    }
+  }
+
+  async function serienStornoBestaetigen() {
+    if (!serienStornoId) return
+    try {
+      await serieStornieren(serienStornoId)
+      toast.success("Serie storniert")
+      setSerienStornoId(null)
+      setDetailId(null)
+    } catch {
+      toast.error("Die Serie konnte nicht storniert werden. Bitte versuche es erneut.")
     }
   }
 
@@ -265,6 +303,13 @@ export function MeineBuchungenPage() {
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     {detailBuchung.zeitfenster.start}–{detailBuchung.zeitfenster.ende} Uhr
                   </div>
+                  {detailBuchung.serienId && (
+                    <div className="flex items-center gap-2">
+                      <Repeat className="h-4 w-4 text-muted-foreground" />
+                      Teil einer Serie · {detailSerienAktiv} bevorstehende
+                      {detailSerienAktiv === 1 ? "r Termin" : " Termine"}
+                    </div>
+                  )}
                   {detailBuchung.notiz && (
                     <div className="flex items-start gap-2">
                       <StickyNote className="mt-0.5 h-4 w-4 text-muted-foreground" />
@@ -275,7 +320,7 @@ export function MeineBuchungenPage() {
                 <Separator />
                 <AusstattungListe merkmale={detailRaum.ausstattung} />
               </div>
-              <DialogFooter className="flex-row justify-between sm:justify-between">
+              <DialogFooter className="flex-row flex-wrap justify-between gap-2 sm:justify-between">
                 <Button
                   variant="outline"
                   className="gap-2"
@@ -286,14 +331,26 @@ export function MeineBuchungenPage() {
                 </Button>
                 {detailBuchung.status === "bestätigt" &&
                   detailBuchung.datum >= HEUTE && (
-                    <Button
-                      variant="ghost"
-                      className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => setStornoId(detailBuchung.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Stornieren
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                      {detailBuchung.serienId && detailSerienAktiv > 1 && (
+                        <Button
+                          variant="ghost"
+                          className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => setSerienStornoId(detailBuchung.serienId!)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Ganze Serie stornieren
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => setStornoId(detailBuchung.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {detailBuchung.serienId ? "Diesen Termin stornieren" : "Stornieren"}
+                      </Button>
+                    </div>
                   )}
               </DialogFooter>
             </>
@@ -317,6 +374,27 @@ export function MeineBuchungenPage() {
             </Button>
             <Button variant="destructive" onClick={stornoBestaetigen}>
               Ja, stornieren
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Serien-Storno-Bestätigung (CLVN-031) */}
+      <Dialog open={!!serienStornoId} onOpenChange={(o) => !o && setSerienStornoId(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Ganze Serie stornieren?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Möchtest du wirklich alle {serienStornoAnzahl} noch bestätigten Termine
+            dieser Serie stornieren? Die Räume werden wieder für andere freigegeben.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSerienStornoId(null)}>
+              Abbrechen
+            </Button>
+            <Button variant="destructive" onClick={serienStornoBestaetigen}>
+              Ja, ganze Serie stornieren
             </Button>
           </DialogFooter>
         </DialogContent>
