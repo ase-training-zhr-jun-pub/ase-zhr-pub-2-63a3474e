@@ -1,0 +1,112 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - backend/**
+      - .github/workflows/backend-ci.yml
+  pull_request:
+    paths:
+      - backend/**
+
+jobs:
+  # ── Job 1: Tests ausführen und Ergebnisse reporten ────────────────────────
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write        # benötigt von dorny/test-reporter
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: calvin_test
+          POSTGRES_USER: calvin
+          POSTGRES_PASSWORD: calvin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U calvin -d calvin_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+
+      - name: Tests ausführen und JAR bauen
+        working-directory: backend
+        env:
+          SPRING_TEST_DATASOURCE_URL: jdbc:postgresql://localhost:5432/calvin_test
+          SPRING_DATASOURCE_USERNAME: calvin
+          SPRING_DATASOURCE_PASSWORD: calvin
+        run: ./mvnw verify
+
+      - name: Testergebnisse reporten
+        uses: dorny/test-reporter@v1
+        if: success() || failure()   # auch bei Testfehler ausführen
+        with:
+          name: JUnit-Tests
+          path: backend/target/surefire-reports/TEST-*.xml
+          reporter: java-junit
+          fail-on-error: true
+
+      - name: JAR als Artifact bereitstellen
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: booking-service-jar
+          path: backend/target/booking-service-*.jar
+          retention-days: 1
+
+  # ── Job 2: Docker-Image bauen und in GHCR pushen ──────────────────────────
+  docker:
+    name: Docker-Image
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write      # benötigt für den Push in die GHCR
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JAR-Artifact herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          name: booking-service-jar
+          path: backend/target
+
+      - name: Bei GHCR anmelden
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker-Metadaten ermitteln
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/booking-service
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Docker-Image bauen und in GHCR pushen
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
