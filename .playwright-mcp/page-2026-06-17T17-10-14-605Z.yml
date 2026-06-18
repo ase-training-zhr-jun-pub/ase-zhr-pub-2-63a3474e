@@ -1,0 +1,195 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: C
+        - generic [ref=e8]: Calvin
+      - navigation [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+          - text: Dashboard
+        - link "Raum buchen" [ref=e14] [cursor=pointer]:
+          - /url: /buchen
+          - img [ref=e15]
+          - text: Raum buchen
+        - link "Meine Buchungen" [ref=e16] [cursor=pointer]:
+          - /url: /buchungen
+          - img [ref=e17]
+          - text: Meine Buchungen
+        - link "Übersicht" [ref=e19] [cursor=pointer]:
+          - /url: /uebersicht
+          - img [ref=e20]
+          - text: Übersicht
+      - generic [ref=e26]:
+        - img [ref=e27]
+        - generic [ref=e30]:
+          - text: "Dein Standort:"
+          - strong [ref=e31]: Köln
+    - generic [ref=e32]:
+      - banner [ref=e33]:
+        - generic [ref=e34]:
+          - button [ref=e35]:
+            - img [ref=e36]
+          - generic [ref=e40]:
+            - generic [ref=e42]: AB
+            - generic [ref=e43]: Alex Berger
+      - main [ref=e44]:
+        - generic [ref=e163]:
+          - generic [ref=e164]:
+            - heading "Raum buchen" [level=1] [ref=e165]
+            - paragraph [ref=e166]: In vier Schritten zum passenden Konferenzraum.
+          - generic [ref=e168]:
+            - generic [ref=e170]:
+              - img [ref=e172]
+              - generic [ref=e174]: Zeitraum
+            - generic [ref=e177]:
+              - generic [ref=e178]: "2"
+              - generic [ref=e179]: Raum
+            - generic [ref=e182]:
+              - generic [ref=e183]: "3"
+              - generic [ref=e184]: Details
+            - generic [ref=e187]:
+              - generic [ref=e188]: "4"
+              - generic [ref=e189]: Bestätigung
+          - generic [ref=e190]:
+            - generic [ref=e192]:
+              - generic [ref=e193]:
+                - img [ref=e194]
+                - text: Köln
+              - generic [ref=e197]:
+                - img [ref=e198]
+                - text: Heute · 09:00–10:00
+              - button "Ändern" [ref=e201]
+            - generic [ref=e202]:
+              - generic [ref=e203]:
+                - img [ref=e204]
+                - text: Filter
+              - combobox [ref=e206]:
+                - generic [ref=e207]: Kapazität
+                - img: ▼
+              - textbox [ref=e208]: alle
+              - combobox [ref=e209]:
+                - generic [ref=e210]: Ausstattung
+                - img: ▼
+              - textbox [ref=e211]: alle
+              - generic [ref=e212]: 3 von 6 Räumen frei
+            - generic [ref=e213]:
+              - generic [ref=e215] [cursor=pointer]:
+                - generic [ref=e216]:
+                  - generic [ref=e217]:
+                    - generic [ref=e219]: Ahr
+                    - generic [ref=e220]:
+                      - img
+                      - text: "4"
+                    - generic [ref=e221]: EG
+                  - generic [ref=e222]:
+                    - generic [ref=e223]:
+                      - img
+                      - text: TV
+                    - generic [ref=e224]:
+                      - img
+                      - text: Videokonferenz
+                - button "Auswählen" [ref=e226]
+              - generic [ref=e228] [cursor=pointer]:
+                - generic [ref=e229]:
+                  - generic [ref=e230]:
+                    - generic [ref=e232]: Eifel
+                    - generic [ref=e233]:
+                      - img
+                      - text: "6"
+                    - generic [ref=e234]: 3. OG
+                  - generic [ref=e235]:
+                    - generic [ref=e236]:
+                      - img
+                      - text: Whiteboard
+                    - generic [ref=e237]:
+                      - img
+                      - text: Videokonferenz
+                    - generic [ref=e238]:
+                      - img
+                      - text: Flipchart
+                - button "Auswählen" [ref=e240]
+              - generic [ref=e242] [cursor=pointer]:
+                - generic [ref=e243]:
+                  - generic [ref=e244]:
+                    - generic [ref=e246]: Rheingold
+                    - generic [ref=e247]:
+                      - img
+                      - text: "8"
+                    - generic [ref=e248]: 3. OG
+                  - generic [ref=e249]:
+                    - generic [ref=e250]:
+                      - img
+                      - text: Whiteboard
+                    - generic [ref=e251]:
+                      - img
+                      - text: TV
+                    - generic [ref=e252]:
+                      - img
+                      - text: Beamer
+                - button "Auswählen" [ref=e254]
+              - generic [ref=e256]:
+                - generic [ref=e257]:
+                  - generic [ref=e258]:
+                    - generic [ref=e260]: Spessart
+                    - generic [ref=e261]:
+                      - img
+                      - text: "2"
+                    - generic [ref=e262]: 2. OG
+                  - generic [ref=e263]:
+                    - generic [ref=e264]:
+                      - img
+                      - text: Telefon
+                    - generic [ref=e265]:
+                      - img
+                      - text: TV
+                  - paragraph [ref=e266]: Belegt im gewünschten Zeitraum · ⚡ frei ab 17:00
+                - button "Ab 17:00 buchen" [ref=e268]
+              - generic [ref=e270]:
+                - generic [ref=e271]:
+                  - generic [ref=e272]:
+                    - generic [ref=e274]: Bergkristall
+                    - generic [ref=e275]:
+                      - img
+                      - text: "4"
+                    - generic [ref=e276]: 2. OG
+                  - generic [ref=e277]:
+                    - generic [ref=e278]:
+                      - img
+                      - text: Whiteboard
+                    - generic [ref=e279]:
+                      - img
+                      - text: TV
+                    - generic [ref=e280]:
+                      - img
+                      - text: Videokonferenz
+                  - paragraph [ref=e281]: Belegt im gewünschten Zeitraum · ⚡ frei ab 17:00
+                - button "Ab 17:00 buchen" [ref=e283]
+              - generic [ref=e285]:
+                - generic [ref=e286]:
+                  - generic [ref=e287]:
+                    - generic [ref=e289]: Mosel
+                    - generic [ref=e290]:
+                      - img
+                      - text: "10"
+                    - generic [ref=e291]: EG
+                  - generic [ref=e292]:
+                    - generic [ref=e293]:
+                      - img
+                      - text: Beamer
+                    - generic [ref=e294]:
+                      - img
+                      - text: Whiteboard
+                    - generic [ref=e295]:
+                      - img
+                      - text: Videokonferenz
+                    - generic [ref=e296]:
+                      - img
+                      - text: Flipchart
+                  - paragraph [ref=e297]: Belegt im gewünschten Zeitraum · ⚡ frei ab 15:00
+                - button "Ab 15:00 buchen" [ref=e299]
+            - button "Zurück" [ref=e301]:
+              - img
+              - text: Zurück
+  - region "Notifications alt+T"

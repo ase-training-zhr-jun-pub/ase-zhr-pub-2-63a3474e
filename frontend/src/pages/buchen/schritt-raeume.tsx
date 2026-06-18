@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useNavigate, Navigate } from "react-router-dom"
 import {
   MapPin,
@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   Filter,
   Check,
+  Loader2,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -25,13 +26,15 @@ import {
   getRaeumeByStandort,
   getRaum,
   getStandort,
-  istRaumFrei,
-  naechsteFreieZeit,
+  istRaumFreiIn,
+  naechsteFreieZeitIn,
   formatDatumKurz,
   istHeute,
   type AusstattungsMerkmal,
+  type Belegung,
 } from "@/lib/mock-data"
 import { useBuchung } from "@/lib/buchung-context"
+import { ladeBelegungen } from "@/lib/buchungen-api"
 import { cn } from "@/lib/utils"
 
 const ALLE_AUSSTATTUNG: AusstattungsMerkmal[] = [
@@ -52,8 +55,30 @@ export function SchrittRaeume() {
   // Vorauswahl bleibt lokal, bis sie bestätigt wird; aus dem Entwurf initialisiert,
   // damit ein zuvor bestätigter Raum bei Rückkehr wieder markiert ist.
   const [vorauswahl, setVorauswahl] = useState<string | null>(() => entwurf.raumId ?? null)
+  // Belegungen für den gewählten Standort/Tag aus dem Booking Service (CLVN-010).
+  const [belegungen, setBelegungen] = useState<Belegung[]>([])
+  const [ladenLaeuft, setLadenLaeuft] = useState(true)
 
   const { standortId, datum, startzeit, endzeit } = entwurf
+
+  useEffect(() => {
+    if (!standortId || !datum) return
+    let abgebrochen = false
+    setLadenLaeuft(true)
+    ladeBelegungen(standortId, datum)
+      .then((b) => {
+        if (!abgebrochen) setBelegungen(b)
+      })
+      .catch(() => {
+        if (!abgebrochen) setBelegungen([])
+      })
+      .finally(() => {
+        if (!abgebrochen) setLadenLaeuft(false)
+      })
+    return () => {
+      abgebrochen = true
+    }
+  }, [standortId, datum])
 
   const gefiltert = useMemo(() => {
     if (!standortId || !datum || !startzeit || !endzeit) return []
@@ -66,12 +91,12 @@ export function SchrittRaeume() {
     }
     // Freie Räume zuerst
     return r.sort((a, b) => {
-      const aFrei = istRaumFrei(a.id, datum, startzeit, endzeit)
-      const bFrei = istRaumFrei(b.id, datum, startzeit, endzeit)
+      const aFrei = istRaumFreiIn(belegungen, a.id, datum, startzeit, endzeit)
+      const bFrei = istRaumFreiIn(belegungen, b.id, datum, startzeit, endzeit)
       if (aFrei === bFrei) return a.kapazitaet - b.kapazitaet
       return aFrei ? -1 : 1
     })
-  }, [standortId, datum, startzeit, endzeit, minKapazitaet, ausstattungFilter])
+  }, [standortId, datum, startzeit, endzeit, minKapazitaet, ausstattungFilter, belegungen])
 
   // Ohne Zeitraum zurück zu Schritt 1
   if (!standortId || !datum || !startzeit || !endzeit) {
@@ -80,7 +105,7 @@ export function SchrittRaeume() {
 
   const standort = getStandort(standortId)
   const anzahlFrei = gefiltert.filter((r) =>
-    istRaumFrei(r.id, datum, startzeit, endzeit)
+    istRaumFreiIn(belegungen, r.id, datum, startzeit, endzeit)
   ).length
 
   const vorausgewaehlterRaum = vorauswahl ? getRaum(vorauswahl) : undefined
@@ -159,22 +184,33 @@ export function SchrittRaeume() {
           </SelectContent>
         </Select>
         <span className="ml-auto text-sm text-muted-foreground">
-          {anzahlFrei} von {gefiltert.length} Räumen frei
+          {ladenLaeuft
+            ? "Verfügbarkeit wird geprüft …"
+            : `${anzahlFrei} von ${gefiltert.length} Räumen frei`}
         </span>
       </div>
 
       {/* Raumliste */}
       <div className="space-y-3">
-        {gefiltert.length === 0 && (
+        {ladenLaeuft && (
+          <Card>
+            <CardContent className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Verfügbarkeit wird geprüft …
+            </CardContent>
+          </Card>
+        )}
+        {!ladenLaeuft && gefiltert.length === 0 && (
           <Card>
             <CardContent className="py-10 text-center text-muted-foreground">
               Keine Räume entsprechen den Filtern.
             </CardContent>
           </Card>
         )}
-        {gefiltert.map((raum) => {
-          const frei = istRaumFrei(raum.id, datum, startzeit, endzeit)
-          const freiAb = !frei ? naechsteFreieZeit(raum.id, datum) : null
+        {!ladenLaeuft &&
+          gefiltert.map((raum) => {
+            const frei = istRaumFreiIn(belegungen, raum.id, datum, startzeit, endzeit)
+            const freiAb = !frei ? naechsteFreieZeitIn(belegungen, raum.id, datum) : null
           const istVorausgewaehlt = vorauswahl === raum.id
           return (
             <Card

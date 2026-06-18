@@ -19,7 +19,8 @@ Repository-Root (`.claude/rules/`). Halte dich zusätzlich an die dortigen Vorga
 - [Technische Schulden](../docs/architektur/technische-schulden.md)
 - ADRs: [Technologie-Stack](../docs/architektur/adrs/ADR-001-technologie-stack-fuer-booking-service.md) ·
   [Ressourcen als Mock](../docs/architektur/adrs/ADR-002-ressourcendaten-als-mock-in-spa.md) ·
-  [Basic-Auth statt Okta](../docs/architektur/adrs/ADR-003-basic-auth-statt-okta-im-prototyp.md)
+  [Basic-Auth statt Okta](../docs/architektur/adrs/ADR-003-basic-auth-statt-okta-im-prototyp.md) ·
+  [Persistenz (PostgreSQL/JPA)](../docs/architektur/adrs/ADR-004-persistenz-mit-postgresql-und-jpa.md)
 
 ## Backend-Technologie
 
@@ -27,6 +28,8 @@ Repository-Root (`.claude/rules/`). Halte dich zusätzlich an die dortigen Vorga
 - **Spring Boot 4.1.0** — Web-Starter heißt hier `spring-boot-starter-webmvc`
   (nicht mehr `-web`); Namespace ist **Jakarta** (`jakarta.*`, nicht `javax.*`)
 - **Maven** als Build-Tool (Wrapper `./mvnw` vorhanden, System-`mvn` ebenfalls ok)
+- **PostgreSQL** als persistente Datenbank, Zugriff über **Spring Data JPA / Hibernate**
+  (relationale DB mit Transaktionen + Locking gemäß ADR-001). Lokal via `docker-compose.yml`.
 - Coordinates: `io.innoq.calvin:booking-service`, Basispaket `io.innoq.calvin.booking`
 
 Begründung der Wahl: siehe [ADR-001 Technologie-Stack](../docs/architektur/adrs/ADR-001-technologie-stack-fuer-booking-service.md).
@@ -70,10 +73,25 @@ io.innoq.calvin.booking
     └── out/persistence/  # JPA-Adapter, implementieren die out-Ports
 ```
 
-> Aktueller Stand: nur ein minimales Skelett (`web/HelloController.java`). Beim ersten
-> echten Feature den `HelloController` nach `adapter/in/web/` ziehen und die obige
-> Struktur etablieren. Regel: **Abhängigkeiten zeigen nach innen** (Adapter → Application
-> → Domain), niemals umgekehrt.
+> Regel: **Abhängigkeiten zeigen nach innen** (Adapter → Application → Domain), niemals
+> umgekehrt. Die Struktur ist etabliert: `domain/` (Buchung, Zeitfenster, …),
+> `application/` (BuchungService + Use-Case-Ports), `adapter/in/web/` (REST) und
+> `adapter/out/persistence/` (JPA).
+
+## Persistenz (PostgreSQL + JPA)
+
+- **Domäne bleibt framework-frei:** Die Domänen-Entität `domain/Buchung` trägt **keine**
+  JPA-Annotationen. Der Persistenz-Adapter hat ein eigenes JPA-Modell `BuchungJpaEntity`;
+  `BuchungPersistenzMapper` übersetzt zwischen beiden, `JpaBuchungRepository` implementiert
+  den Out-Port `BuchungRepository`. Das Zeitfenster wird auf zwei Spalten abgeflacht.
+- **QS-1 (keine Doppelbuchungen):** `BuchungService.anlegen` läuft `@Transactional(isolation =
+  SERIALIZABLE)`. PostgreSQL-SSI bricht kollidierende Transaktionen ab (`SQLState 40001`); der
+  Decorator `WiederholendesAnlegen` fängt diese (`ConcurrencyFailureException`) und wiederholt.
+  Anhaltende Konflikte → HTTP 503. Der frühere `ReentrantLock` ist entfallen.
+- **Seed:** `BuchungSeed` befüllt die DB **nur, wenn sie leer ist** (sonst Duplikate bei jedem
+  Start). `InMemoryBuchungRepository` ist kein Spring-Bean mehr, sondern nur noch Test-Hilfe.
+- **Schema:** im Prototyp `spring.jpa.hibernate.ddl-auto=update`. Für Produktion auf `validate`
+  + Migrationen (z. B. Flyway) umstellen.
 
 ## Wichtige Dateien
 
@@ -96,6 +114,15 @@ io.innoq.calvin.booking
 | JAR direkt starten | `java -jar target/booking-service-0.0.1-SNAPSHOT.jar` |
 | Endpunkt prüfen | `curl http://localhost:8081/api/hello` |
 | SDKs (JDK + Maven) installieren | `../scripts/install-sdk.sh` |
+| Datenbank starten (Docker) | `docker compose up -d` |
+| Datenbank stoppen | `docker compose down` (Daten bleiben), `-v` löscht sie |
+| In die DB schauen | `psql -h localhost -U calvin -d calvin` (Passwort `calvin`) |
+
+> **Persistenz / DB-Betrieb:** Der Service braucht ein laufendes PostgreSQL (Standard:
+> `localhost:5432`, DB/User/Passwort `calvin`). Bevorzugt via `docker compose up -d`.
+> Falls Docker nicht verfügbar ist (z. B. Trainingsumgebung ohne Docker-in-Docker), ein
+> natives PostgreSQL installieren und Rolle + DBs `calvin`/`calvin_test` anlegen. Tests laufen
+> gegen `calvin_test`. DB-Verbindung ist über `SPRING_DATASOURCE_*`-Env-Variablen überschreibbar.
 
 ## Code Smells (vermeiden)
 

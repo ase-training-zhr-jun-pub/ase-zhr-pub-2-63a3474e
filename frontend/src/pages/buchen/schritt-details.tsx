@@ -1,17 +1,15 @@
 import { useState } from "react"
 import { useNavigate, Navigate } from "react-router-dom"
-import { ArrowLeft, Check } from "lucide-react"
+import { ArrowLeft, Check, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RaumZusammenfassung } from "@/components/raum-zusammenfassung"
-import {
-  getRaum,
-  getStandort,
-  type Buchung,
-} from "@/lib/mock-data"
+import { getRaum, getStandort, aktuellerNutzer } from "@/lib/mock-data"
 import { useBuchung } from "@/lib/buchung-context"
+import { createBuchung, RaumBereitsBelegtError } from "@/lib/buchungen-api"
 
 export function SchrittDetails() {
   const navigate = useNavigate()
@@ -19,6 +17,7 @@ export function SchrittDetails() {
 
   const [titel, setTitel] = useState(entwurf.titel ?? "")
   const [notiz, setNotiz] = useState(entwurf.notiz ?? "")
+  const [sendetGerade, setSendetGerade] = useState(false)
 
   if (!entwurf.raumId || !entwurf.standortId || !entwurf.datum) {
     return <Navigate to="/buchen" replace />
@@ -27,22 +26,38 @@ export function SchrittDetails() {
   const raum = getRaum(entwurf.raumId)!
   const standort = getStandort(entwurf.standortId)!
 
-  function absenden() {
-    const id = `buchung-${entwurf.raumId}-${entwurf.datum}-${entwurf.startzeit}`
-    const neueBuchung: Buchung = {
-      id,
-      raumId: entwurf.raumId!,
-      standortId: entwurf.standortId!,
-      datum: entwurf.datum!,
-      zeitfenster: { start: entwurf.startzeit!, ende: entwurf.endzeit! },
-      titel: titel.trim() || "Meeting",
-      notiz: notiz.trim() || undefined,
-      status: "bestätigt",
-      gebuchtVon: "Alex Berger",
+  async function absenden() {
+    const finalerTitel = titel.trim() || "Meeting"
+    const finaleNotiz = notiz.trim() || undefined
+    setEntwurf({ titel: finalerTitel, notiz: finaleNotiz })
+    setSendetGerade(true)
+    try {
+      // Backend prüft Verfügbarkeit autoritativ und verhindert Doppelbuchungen (QS-1).
+      const buchung = await createBuchung({
+        raumId: entwurf.raumId!,
+        standortId: entwurf.standortId!,
+        datum: entwurf.datum!,
+        start: entwurf.startzeit!,
+        ende: entwurf.endzeit!,
+        titel: finalerTitel,
+        notiz: finaleNotiz,
+        gebuchtVon: aktuellerNutzer.name,
+      })
+      buchungHinzufuegen(buchung)
+      navigate(`/buchen/bestaetigung?id=${encodeURIComponent(buchung.id)}`)
+    } catch (e) {
+      if (e instanceof RaumBereitsBelegtError) {
+        toast.error(
+          e.naechsteFreieZeit
+            ? `Der Raum wurde zwischenzeitlich gebucht. Frei ab ${e.naechsteFreieZeit} Uhr.`
+            : "Der Raum wurde zwischenzeitlich gebucht. Bitte wähle ein anderes Zeitfenster.",
+          { description: "Gehe zurück zur Raumauswahl, um einen freien Raum zu wählen." }
+        )
+      } else {
+        toast.error("Die Buchung konnte nicht gespeichert werden. Bitte versuche es erneut.")
+      }
+      setSendetGerade(false)
     }
-    setEntwurf({ titel: neueBuchung.titel, notiz: neueBuchung.notiz })
-    buchungHinzufuegen(neueBuchung)
-    navigate(`/buchen/bestaetigung?id=${encodeURIComponent(id)}`)
   }
 
   return (
@@ -84,13 +99,23 @@ export function SchrittDetails() {
               variant="ghost"
               onClick={() => navigate("/buchen/raeume")}
               className="gap-2"
+              disabled={sendetGerade}
             >
               <ArrowLeft className="h-4 w-4" />
               Zurück
             </Button>
-            <Button onClick={absenden} className="gap-2">
-              <Check className="h-4 w-4" />
-              Verbindlich buchen
+            <Button onClick={absenden} className="gap-2" disabled={sendetGerade}>
+              {sendetGerade ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Wird gebucht …
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  Verbindlich buchen
+                </>
+              )}
             </Button>
           </div>
         </CardContent>

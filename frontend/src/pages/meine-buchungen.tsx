@@ -135,12 +135,15 @@ export function MeineBuchungenPage() {
     toast.success("Buchung in die Zwischenablage kopiert")
   }
 
-  function stornoBestaetigen() {
-    if (stornoId) {
-      buchungStornieren(stornoId)
+  async function stornoBestaetigen() {
+    if (!stornoId) return
+    try {
+      await buchungStornieren(stornoId)
       toast.success("Buchung storniert")
       setStornoId(null)
       setDetailId(null)
+    } catch {
+      toast.error("Die Buchung konnte nicht storniert werden. Bitte versuche es erneut.")
     }
   }
 

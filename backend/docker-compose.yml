@@ -1,0 +1,27 @@
+# PostgreSQL für den Calvin Booking Service (lokaler Dev-Betrieb).
+# Start:  docker compose up -d        (aus dem backend/-Verzeichnis)
+# Stop:   docker compose down         (Daten bleiben im Volume erhalten)
+# Reset:  docker compose down -v      (Volume + Daten löschen)
+#
+# Die Daten liegen im benannten Volume `calvin-pgdata` und überleben Neustarts –
+# damit ist die Buchungspersistenz dauerhaft (löst die In-Memory-Schuld ab).
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: calvin-postgres
+    environment:
+      POSTGRES_DB: calvin
+      POSTGRES_USER: calvin
+      POSTGRES_PASSWORD: calvin
+    ports:
+      - "5432:5432"
+    volumes:
+      - calvin-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calvin -d calvin"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  calvin-pgdata:

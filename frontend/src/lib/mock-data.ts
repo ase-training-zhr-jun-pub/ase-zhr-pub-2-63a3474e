@@ -1,5 +1,7 @@
-// Zentrale Mock-Daten für den Calvin Prototypen — kein Backend.
-// Realistische INNOQ-Standorte, plausible Raumnamen und Zeitslots.
+// Ressourcen-Stammdaten (Standorte, Räume, Ausstattung) als Mock in der SPA — gemäß
+// ADR-002 besitzt der Booking Service keinen Ressourcenkatalog, sondern arbeitet nur
+// mit den hier vergebenen IDs. Buchungen und Belegungen kommen dagegen aus dem Backend
+// (siehe lib/buchungen-api.ts); sie werden hier NICHT mehr gemockt.
 
 export type AusstattungsMerkmal =
   | "Whiteboard"
@@ -350,91 +352,6 @@ export const raeume: Raum[] = [
 
 export const HEUTE = "2026-06-17"
 
-// --- Belegungen (für Verfügbarkeitsprüfung & Raumkalender) ---
-
-export const belegungen: Belegung[] = [
-  // Köln, heute (17.06.)
-  { raumId: "koeln-bergkristall", datum: HEUTE, zeitfenster: { start: "09:00", ende: "10:00" }, titel: "Daily Standup" },
-  { raumId: "koeln-bergkristall", datum: HEUTE, zeitfenster: { start: "12:00", ende: "14:00" }, titel: "Sprint Planning" },
-  { raumId: "koeln-bergkristall", datum: HEUTE, zeitfenster: { start: "16:00", ende: "17:00" }, titel: "Retro" },
-  { raumId: "koeln-rheingold", datum: HEUTE, zeitfenster: { start: "11:00", ende: "13:00" }, titel: "Architektur-Review" },
-  { raumId: "koeln-rheingold", datum: HEUTE, zeitfenster: { start: "15:00", ende: "16:00" }, titel: "1:1" },
-  { raumId: "koeln-mosel", datum: HEUTE, zeitfenster: { start: "09:00", ende: "13:00" }, titel: "Kundenworkshop ACME" },
-  { raumId: "koeln-mosel", datum: HEUTE, zeitfenster: { start: "14:00", ende: "15:00" }, titel: "Vertriebsmeeting" },
-  { raumId: "koeln-spessart", datum: HEUTE, zeitfenster: { start: "09:00", ende: "10:00" }, titel: "Remote-Call" },
-  { raumId: "koeln-spessart", datum: HEUTE, zeitfenster: { start: "10:00", ende: "11:00" }, titel: "Remote-Call" },
-  { raumId: "koeln-spessart", datum: HEUTE, zeitfenster: { start: "15:00", ende: "17:00" }, titel: "Kundengespräch" },
-  { raumId: "koeln-eifel", datum: HEUTE, zeitfenster: { start: "13:00", ende: "14:00" }, titel: "Refinement" },
-  { raumId: "koeln-ahr", datum: HEUTE, zeitfenster: { start: "10:00", ende: "11:00" }, titel: "Pairing" },
-
-  // Köln, morgen (18.06.)
-  { raumId: "koeln-bergkristall", datum: "2026-06-18", zeitfenster: { start: "09:00", ende: "10:00" }, titel: "Daily Standup" },
-  { raumId: "koeln-mosel", datum: "2026-06-18", zeitfenster: { start: "10:00", ende: "12:00" }, titel: "Workshop" },
-  { raumId: "koeln-rheingold", datum: "2026-06-18", zeitfenster: { start: "14:00", ende: "16:00" }, titel: "Design Session" },
-
-  // Hamburg, diverse Tage
-  { raumId: "hamburg-elbe", datum: "2026-06-22", zeitfenster: { start: "10:00", ende: "12:00" }, titel: "Kundenworkshop" },
-  { raumId: "hamburg-alster", datum: HEUTE, zeitfenster: { start: "13:00", ende: "14:00" }, titel: "Team-Lunch-Planung" },
-]
-
-// --- Eigene Buchungen (Alex Berger) ---
-
-export const meineBuchungen: Buchung[] = [
-  {
-    id: "buchung-1",
-    raumId: "koeln-bergkristall",
-    standortId: "koeln",
-    datum: HEUTE,
-    zeitfenster: { start: "14:00", ende: "15:30" },
-    titel: "Q3 Planungsmeeting",
-    notiz: "Bitte Whiteboard vorbereiten",
-    status: "bestätigt",
-    gebuchtVon: "Alex Berger",
-  },
-  {
-    id: "buchung-2",
-    raumId: "hamburg-elbe",
-    standortId: "hamburg",
-    datum: "2026-06-22",
-    zeitfenster: { start: "10:00", ende: "12:00" },
-    titel: "Kundenworkshop",
-    notiz: "Catering für 10 Personen bestellt",
-    status: "bestätigt",
-    gebuchtVon: "Alex Berger",
-  },
-  {
-    id: "buchung-3",
-    raumId: "koeln-rheingold",
-    standortId: "koeln",
-    datum: "2026-06-24",
-    zeitfenster: { start: "09:00", ende: "10:30" },
-    titel: "Architektur-Sync",
-    status: "bestätigt",
-    gebuchtVon: "Alex Berger",
-  },
-  // Vergangene Buchungen
-  {
-    id: "buchung-4",
-    raumId: "koeln-mosel",
-    standortId: "koeln",
-    datum: "2026-06-10",
-    zeitfenster: { start: "13:00", ende: "17:00" },
-    titel: "Strategie-Offsite",
-    status: "bestätigt",
-    gebuchtVon: "Alex Berger",
-  },
-  {
-    id: "buchung-5",
-    raumId: "koeln-spessart",
-    standortId: "koeln",
-    datum: "2026-06-05",
-    zeitfenster: { start: "11:00", ende: "12:00" },
-    titel: "Bewerbungsgespräch",
-    status: "storniert",
-    gebuchtVon: "Alex Berger",
-  },
-]
-
 // --- Kollegen im Büro (Persona-Need: Wer ist heute da?) ---
 
 export const kollegenHeute: Record<string, Kollege[]> = {
@@ -479,7 +396,12 @@ export function getRaeumeByStandort(standortId: string): Raum[] {
   return raeume.filter((r) => r.standortId === standortId)
 }
 
-export function getBelegungen(raumId: string, datum: string): Belegung[] {
+// Filtert eine (vom Backend geladene) Belegungsliste auf einen Raum/Tag.
+export function belegungenFuerRaum(
+  belegungen: Belegung[],
+  raumId: string,
+  datum: string
+): Belegung[] {
   return belegungen.filter((b) => b.raumId === raumId && b.datum === datum)
 }
 
@@ -489,20 +411,25 @@ export const ZEIT_SLOTS = [
   "14:00", "15:00", "16:00", "17:00", "18:00",
 ]
 
-// Prüft, ob ein Raum in einem Zeitfenster frei ist
-export function istRaumFrei(
+// Prüft anhand der übergebenen Belegungen, ob ein Raum in einem Zeitfenster frei ist.
+export function istRaumFreiIn(
+  belegungen: Belegung[],
   raumId: string,
   datum: string,
   start: string,
   ende: string
 ): boolean {
-  const bel = getBelegungen(raumId, datum)
+  const bel = belegungenFuerRaum(belegungen, raumId, datum)
   return !bel.some((b) => start < b.zeitfenster.ende && ende > b.zeitfenster.start)
 }
 
-// Findet das nächste freie Zeitfenster nach einer belegten Zeit
-export function naechsteFreieZeit(raumId: string, datum: string): string | null {
-  const bel = getBelegungen(raumId, datum).sort((a, b) =>
+// Findet das nächste freie Zeitfenster nach der letzten Belegung des Tages.
+export function naechsteFreieZeitIn(
+  belegungen: Belegung[],
+  raumId: string,
+  datum: string
+): string | null {
+  const bel = belegungenFuerRaum(belegungen, raumId, datum).sort((a, b) =>
     a.zeitfenster.ende.localeCompare(b.zeitfenster.ende)
   )
   if (bel.length === 0) return null

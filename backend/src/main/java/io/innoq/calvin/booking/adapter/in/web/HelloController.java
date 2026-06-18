@@ -1,4 +1,4 @@
-package io.innoq.calvin.booking.web;
+package io.innoq.calvin.booking.adapter.in.web;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

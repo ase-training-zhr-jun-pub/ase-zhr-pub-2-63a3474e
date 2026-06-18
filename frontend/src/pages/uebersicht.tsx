@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { MapPin, CalendarDays, Info } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,11 +14,13 @@ import {
   standorte,
   getStandort,
   getRaeumeByStandort,
-  getBelegungen,
+  belegungenFuerRaum,
   formatDatumKurz,
   istHeute,
   HEUTE,
+  type Belegung,
 } from "@/lib/mock-data"
+import { ladeBelegungen } from "@/lib/buchungen-api"
 import { useBuchung } from "@/lib/buchung-context"
 
 // Stunden-Spalten für den Kalender (08–18 Uhr)
@@ -48,13 +50,25 @@ export function UebersichtPage() {
 
   const raeume = useMemo(() => getRaeumeByStandort(standortId), [standortId])
 
+  // Belegungen für Standort/Tag aus dem Booking Service laden.
+  const [belegungen, setBelegungen] = useState<Belegung[]>([])
+  useEffect(() => {
+    let abgebrochen = false
+    ladeBelegungen(standortId, datum)
+      .then((b) => !abgebrochen && setBelegungen(b))
+      .catch(() => !abgebrochen && setBelegungen([]))
+    return () => {
+      abgebrochen = true
+    }
+  }, [standortId, datum])
+
   // Für jeden Raum: belegte Stunden als Set
   const belegungsMap = useMemo(() => {
     const map = new Map<string, { belegt: Set<number>; titel: Map<number, string> }>()
     for (const raum of raeume) {
       const belegt = new Set<number>()
       const titel = new Map<number, string>()
-      for (const b of getBelegungen(raum.id, datum)) {
+      for (const b of belegungenFuerRaum(belegungen, raum.id, datum)) {
         const start = Number(b.zeitfenster.start.split(":")[0])
         const ende = Number(b.zeitfenster.ende.split(":")[0])
         for (let h = start; h < ende; h++) {
@@ -65,7 +79,7 @@ export function UebersichtPage() {
       map.set(raum.id, { belegt, titel })
     }
     return map
-  }, [raeume, datum])
+  }, [raeume, datum, belegungen])
 
   function slotBuchen(raumId: string, stunde: number) {
     entwurfZuruecksetzen()
