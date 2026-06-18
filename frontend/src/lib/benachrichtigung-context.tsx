@@ -1,12 +1,20 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useMemo, useState } from "react"
 import { HEUTE, type Buchung } from "@/lib/mock-data"
+import { useBuchung } from "@/lib/buchung-context"
+import { erinnerungenAusBuchungen } from "@/lib/benachrichtigungen"
 
-// CLVN-035 — Benachrichtigungen über Aenderungen/Stornierungen eigener Buchungen.
-// Im Prototyp komplett gemockt: Stornierungen aus "Meine Buchungen" erzeugen eine
-// Benachrichtigung, zusaetzlich gibt es eine vorab als geaendert/abgesagt markierte
-// System-Buchung, damit die Glocke direkt etwas Sinnvolles anzeigt.
+// Vereintes Benachrichtigungs-Center (CLVN-034 + CLVN-035).
+// Im Prototyp komplett gemockt. Es vereint zwei Quellen in EINER Glocke:
+//  - Erinnerungen (CLVN-034): aus den bestätigten, zukünftigen Buchungen abgeleitet.
+//  - Änderungen/Stornierungen (CLVN-035): zustandsbehaftet — Stornierungen aus
+//    "Meine Buchungen" erzeugen eine Meldung; zusätzlich gibt es vorab gemockte
+//    System-Benachrichtigungen, damit die Glocke direkt etwas Sinnvolles anzeigt.
 
-export type BenachrichtigungsTyp = "storniert" | "geaendert" | "serie-fehlgeschlagen"
+export type BenachrichtigungsTyp =
+  | "storniert"
+  | "geaendert"
+  | "serie-fehlgeschlagen"
+  | "erinnerung"
 
 export interface BenachrichtigungBuchung {
   raumId: string
@@ -42,7 +50,7 @@ function neueId(): string {
 }
 
 // Vorab gemockte System-Benachrichtigungen (Auslöser außerhalb des Nutzers).
-const initialeBenachrichtigungen: Benachrichtigung[] = [
+const initialeAenderungen: Benachrichtigung[] = [
   {
     id: "bn-1",
     typ: "geaendert",
@@ -74,22 +82,59 @@ const initialeBenachrichtigungen: Benachrichtigung[] = [
 ]
 
 export function BenachrichtigungProvider({ children }: { children: React.ReactNode }) {
-  const [benachrichtigungen, setBenachrichtigungen] = useState<Benachrichtigung[]>(
-    initialeBenachrichtigungen
+  const { buchungen } = useBuchung()
+
+  // Zustandsbehaftete Änderungs-/Storno-Benachrichtigungen (CLVN-035).
+  const [aenderungen, setAenderungen] = useState<Benachrichtigung[]>(initialeAenderungen)
+  // Gelesen-Status der (abgeleiteten) Erinnerungen (CLVN-034) — nur deren IDs.
+  const [erinnerungGelesen, setErinnerungGelesen] = useState<Set<string>>(new Set())
+
+  // Erinnerungen aus den Buchungen ableiten und ins Benachrichtigungs-Schema mappen.
+  const erinnerungen = useMemo<Benachrichtigung[]>(() => {
+    return erinnerungenAusBuchungen(buchungen).map((e) => {
+      const b = buchungen.find((x) => x.id === e.buchungId)
+      return {
+        id: e.id,
+        typ: "erinnerung" as const,
+        zeitstempel: `${e.datum}T00:00:00`,
+        buchung: {
+          raumId: b?.raumId ?? "",
+          standortId: b?.standortId ?? "",
+          datum: e.datum,
+          zeitfenster: { start: e.zeitfensterStart, ende: e.zeitfensterEnde },
+          titel: e.titel,
+        },
+        grund: "Erinnerung an deine bevorstehende Buchung.",
+        gelesen: erinnerungGelesen.has(e.id),
+      }
+    })
+  }, [buchungen, erinnerungGelesen])
+
+  // Änderungen zuerst (aktuell), dann die Erinnerungen.
+  const benachrichtigungen = useMemo<Benachrichtigung[]>(
+    () => [...aenderungen, ...erinnerungen],
+    [aenderungen, erinnerungen]
   )
 
   const ungeleseneAnzahl = benachrichtigungen.filter((b) => !b.gelesen).length
 
-  const alsGelesenMarkieren = () =>
-    setBenachrichtigungen((prev) => prev.map((b) => ({ ...b, gelesen: true })))
+  const alsGelesenMarkieren = () => {
+    setAenderungen((prev) => prev.map((b) => ({ ...b, gelesen: true })))
+    setErinnerungGelesen(new Set(erinnerungen.map((e) => e.id)))
+  }
 
-  const einzelnGelesen = (id: string) =>
-    setBenachrichtigungen((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, gelesen: true } : b))
-    )
+  const einzelnGelesen = (id: string) => {
+    if (id.startsWith("erinnerung-")) {
+      setErinnerungGelesen((prev) => new Set(prev).add(id))
+    } else {
+      setAenderungen((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, gelesen: true } : b))
+      )
+    }
+  }
 
   const stornoBenachrichtigung = (buchung: Buchung) =>
-    setBenachrichtigungen((prev) => [
+    setAenderungen((prev) => [
       {
         id: neueId(),
         typ: "storniert",

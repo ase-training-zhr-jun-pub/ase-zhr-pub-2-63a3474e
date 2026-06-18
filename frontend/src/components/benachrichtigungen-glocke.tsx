@@ -1,4 +1,4 @@
-import { Bell, CalendarDays, Clock, MapPin, CheckCheck, Info, XCircle, CalendarClock } from "lucide-react"
+import { Bell, BellRing, CalendarDays, Clock, MapPin, CheckCheck, Info, XCircle, CalendarClock } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -21,6 +21,7 @@ const typMeta: Record<
     icon: Info,
     farbe: "text-amber-600",
   },
+  erinnerung: { label: "Erinnerung", icon: BellRing, farbe: "text-primary" },
 }
 
 function zeitLabel(iso: string): string {
