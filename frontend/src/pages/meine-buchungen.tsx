@@ -35,6 +35,7 @@ import {
   type Buchung,
 } from "@/lib/mock-data"
 import { useBuchung } from "@/lib/buchung-context"
+import { useBenachrichtigung } from "@/lib/benachrichtigung-context"
 
 function StatusBadge({ status }: { status: Buchung["status"] }) {
   if (status === "storniert") {
@@ -113,6 +114,7 @@ export function MeineBuchungenPage() {
   const navigate = useNavigate()
   const { id } = useParams()
   const { buchungen, buchungStornieren } = useBuchung()
+  const { stornoBenachrichtigung } = useBenachrichtigung()
 
   const [detailId, setDetailId] = useState<string | null>(id ?? null)
   const [stornoId, setStornoId] = useState<string | null>(null)
@@ -137,8 +139,10 @@ export function MeineBuchungenPage() {
 
   async function stornoBestaetigen() {
     if (!stornoId) return
+    const stornierteBuchung = buchungen.find((b) => b.id === stornoId)
     try {
       await buchungStornieren(stornoId)
+      if (stornierteBuchung) stornoBenachrichtigung(stornierteBuchung)
       toast.success("Buchung storniert")
       setStornoId(null)
       setDetailId(null)
