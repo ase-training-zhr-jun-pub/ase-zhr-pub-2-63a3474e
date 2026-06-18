@@ -20,7 +20,7 @@ const navItems: NavItem[] = [
 function Logo() {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 font-bold text-primary-foreground shadow-sm shadow-primary/30">
         C
       </div>
       <span className="text-lg font-semibold tracking-tight">Calvin</span>
@@ -50,9 +50,9 @@ export function AppLayout() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                   isActive
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >

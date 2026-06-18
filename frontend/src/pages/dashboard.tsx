@@ -32,6 +32,16 @@ import {
 } from "@/lib/mock-data"
 import { useBuchung } from "@/lib/buchung-context"
 import { BackendStatus } from "@/components/backend-status"
+import { cn } from "@/lib/utils"
+
+// Kleine Farbpalette, damit die Kollegen-Avatare lebendiger wirken als ein Einheitsgrau.
+const AVATAR_FARBEN = [
+  "bg-rose-500/15 text-rose-600",
+  "bg-sky-500/15 text-sky-600",
+  "bg-emerald-500/15 text-emerald-600",
+  "bg-amber-500/15 text-amber-600",
+  "bg-violet-500/15 text-violet-600",
+]
 
 function Begruessung() {
   const stunde = 10 // fester Wert für den Prototypen
@@ -152,7 +162,7 @@ export function DashboardPage() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <CalendarCheck className="h-5 w-5 text-muted-foreground" />
+            <CalendarCheck className="h-5 w-5 text-primary" />
             Meine nächsten Buchungen
           </h2>
           <Button
@@ -177,16 +187,16 @@ export function DashboardPage() {
               return (
                 <Card
                   key={b.id}
-                  className="cursor-pointer transition-shadow hover:shadow-md"
+                  className="cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg hover:ring-primary/30"
                   onClick={() => navigate(`/buchungen/${b.id}`)}
                 >
-                  <CardContent className="space-y-2 py-4">
-                    <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                  <CardContent className="space-y-2.5 py-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
                       <Clock className="h-3.5 w-3.5" />
                       {istHeute(b.datum) ? "Heute" : formatDatumKurz(b.datum)} ·{" "}
                       {b.zeitfenster.start}–{b.zeitfenster.ende}
-                    </div>
-                    <div className="font-semibold">{raum?.name}</div>
+                    </span>
+                    <div className="font-semibold leading-snug">{raum?.name}</div>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <MapPin className="h-3.5 w-3.5" />
                       {standort?.name}
@@ -205,7 +215,7 @@ export function DashboardPage() {
       {/* Wer ist heute im Büro */}
       <div>
         <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-          <Users className="h-5 w-5 text-muted-foreground" />
+          <Users className="h-5 w-5 text-primary" />
           Wer ist heute in {getStandort(standortId)?.name}?
         </h2>
         <Card>
@@ -215,11 +225,16 @@ export function DashboardPage() {
                 Heute hat sich niemand für diesen Standort angekündigt.
               </p>
             ) : (
-              <div className="flex flex-wrap items-center gap-4">
-                {kollegen.map((k) => (
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                {kollegen.map((k, i) => (
                   <div key={k.id} className="flex items-center gap-2">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                    <Avatar className="h-9 w-9 ring-2 ring-background">
+                      <AvatarFallback
+                        className={cn(
+                          "text-xs font-semibold",
+                          AVATAR_FARBEN[i % AVATAR_FARBEN.length]
+                        )}
+                      >
                         {k.initialen}
                       </AvatarFallback>
                     </Avatar>
