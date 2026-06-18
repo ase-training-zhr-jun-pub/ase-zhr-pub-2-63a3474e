@@ -19,6 +19,7 @@ Mitarbeiter können schnell und zielgerichtet den passenden Konferenzraum für i
 - [CLVN-004](./CLVN-004-STORY-raeume-nach-kapazitaet-filtern.md) Als INNOQ-Mitarbeiter möchte ich Räume nach Kapazität filtern, damit ich einen Raum finde, der groß genug für meine Teilnehmerzahl ist
 - [CLVN-005](./CLVN-005-STORY-raeume-nach-ausstattung-filtern.md) Als INNOQ-Mitarbeiter möchte ich Räume nach Ausstattung filtern, damit ich einen Raum mit der benötigten technischen Ausstattung finde
 - [CLVN-006](./CLVN-006-STORY-raumdetails-einsehen.md) Als INNOQ-Mitarbeiter möchte ich Raumdetails einsehen, damit ich Informationen zu Größe, Ausstattung und Lage des Raums erhalte
+- [CLVN-032](./CLVN-032-STORY-lieblingsraeume-favorisieren.md) Als INNOQ-Mitarbeiter möchte ich Konferenzräume als Favoriten markieren und schnell wiederbuchen, damit ich für wiederkehrende Anlässe nicht jedes Mal neu suchen muss
 
 ## Betroffene Personas
 

@@ -19,6 +19,7 @@ Verbindliche Raumbuchungen geben INNOQ-Mitarbeitern Planungssicherheit für ihre
 - [CLVN-018](/docs/produkt/backlog/CLVN-018-STORY-meetingtitel-eingeben.md) Als INNOQ-Mitarbeiter möchte ich einen Meetingtitel eingeben, damit ich und andere den Zweck der Buchung erkennen können
 - [CLVN-019](/docs/produkt/backlog/CLVN-019-STORY-raumbuchung-absenden.md) Als INNOQ-Mitarbeiter möchte ich meine Raumbuchung absenden, damit die Reservierung verbindlich wird
 - [CLVN-020](/docs/produkt/backlog/CLVN-020-STORY-buchungsbestaetigung-erhalten.md) Als INNOQ-Mitarbeiter möchte ich eine Buchungsbestätigung erhalten, damit ich Gewissheit habe, dass mein Konferenzraum reserviert ist
+- [CLVN-031](/docs/produkt/backlog/CLVN-031-STORY-serientermin-anlegen.md) Als INNOQ-Mitarbeiter möchte ich eine Raumbuchung als wiederkehrenden Serientermin anlegen, damit ich meinen festen Bürotag nicht jede Woche einzeln buchen muss
 
 ## Betroffene Personas
 

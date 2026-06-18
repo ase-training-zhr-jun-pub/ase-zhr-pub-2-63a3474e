@@ -25,6 +25,17 @@
 - [CLVN-026 Buchung stornieren](CLVN-026-STORY-buchung-stornieren.md)
 - [CLVN-027 Buchung ändern](CLVN-027-STORY-buchung-aendern.md)
 
+### Erweiterungen (neu vorgeschlagen)
+
+- [CLVN-031 Serientermin anlegen](CLVN-031-STORY-serientermin-anlegen.md)
+- [CLVN-032 Lieblingsräume favorisieren](CLVN-032-STORY-lieblingsraeume-favorisieren.md)
+- [CLVN-033 EPIC Benachrichtigungen](CLVN-033-EPIC-benachrichtigungen.md)
+  - [CLVN-034 Buchungserinnerung erhalten](CLVN-034-STORY-buchungserinnerung-erhalten.md)
+  - [CLVN-035 Benachrichtigung bei Änderung/Stornierung](CLVN-035-STORY-benachrichtigung-bei-aenderung.md)
+- [CLVN-036 EPIC Büropräsenz](CLVN-036-EPIC-bueropraesenz.md)
+  - [CLVN-037 Kollegen-Anwesenheit am Standort sehen](CLVN-037-STORY-kollegen-anwesenheit-sehen.md)
+  - [CLVN-038 Eigene Büroanwesenheit ankündigen](CLVN-038-STORY-eigene-anwesenheit-ankuendigen.md)
+
 ## Done
 
 - [CLVN-002 Bürostandort auswählen](CLVN-002-STORY-buerostandort-auswaehlen.md)
