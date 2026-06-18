@@ -68,11 +68,23 @@ export interface Kollege {
 // aus einer bestehenden Raumbuchung am Standort abgeleitet.
 export type AnwesenheitsGrund = "signalisiert" | "raumbuchung"
 
-export interface Anwesenheit {
+// Ein abgeleiteter Eintrag der Anwesenheitsliste (CLVN-037, reine Ansicht).
+export interface AnwesenheitsEintrag {
   kollege: Kollege
   grund: AnwesenheitsGrund
   /** Markiert die eigene Anwesenheit des aktuellen Nutzers. */
   istIchSelbst: boolean
+}
+
+// Eine angekündigte Büroanwesenheit (CLVN-038): vom Mitarbeiter signalisiert,
+// unabhängig von einer Raumbuchung. Quelle der "signalisiert"-Einträge oben.
+export interface Anwesenheit {
+  id: string
+  personId: string
+  name: string
+  initialen: string
+  standortId: string
+  datum: string // ISO "YYYY-MM-DD"
 }
 
 // --- Standorte (alle 8 INNOQ-Standorte) ---
@@ -384,28 +396,55 @@ export const kollegen: Kollege[] = [
   { id: "k13", name: "Sofia Reim", initialen: "SR", standortId: "zuerich" },
 ]
 
-// --- Signalisierte Anwesenheit (CLVN-038): wer hat sich für welchen Tag an welchem
-// Standort angekündigt? Gemockt für die nächsten Tage rund um HEUTE. Schlüssel: ISO-Datum.
-// Werte: Kollegen-IDs. Datenschutzkonform sparsam — nur die ID, kein Profil. ---
-
-const signalisierteAnwesenheit: Record<string, string[]> = {
-  // Heute (2026-06-17)
-  "2026-06-17": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
-  // Morgen — der aktuelle Nutzer (Alex Berger, Köln) ist selbst angekündigt
-  "2026-06-18": ["ich", "k1", "k3", "k6", "k11"],
-  "2026-06-19": ["k2", "k4", "k9", "k13"],
-  "2026-06-22": ["ich", "k1", "k2", "k8", "k12"],
-  "2026-06-23": ["k5", "k7", "k10"],
-}
+// Angekündigte Anwesenheiten siehe `anwesenheitenInitial` weiter unten (CLVN-038).
 
 // --- Aktueller Nutzer ---
 
 export const aktuellerNutzer = {
+  id: "me",
   name: "Alex Berger",
   initialen: "AB",
   rolle: "Senior Consultant",
   standortId: "koeln",
 }
+
+// --- Angekündigte Büroanwesenheiten (CLVN-038) ---
+// Start-Mock kompakt als Datum→IDs ("me" = aktueller Nutzer), expandiert zu Records.
+// Diese Liste ist die Quelle der "signalisiert"-Einträge in der Anwesenheitsliste und
+// wird zur Laufzeit über den Anwesenheits-Context (CLVN-038) ergänzt.
+const ANGEKUENDIGT_MOCK: Record<string, string[]> = {
+  "2026-06-17": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
+  "2026-06-18": ["me", "k1", "k3", "k6", "k11"],
+  "2026-06-19": ["k2", "k4", "k9", "k13"],
+  "2026-06-22": ["me", "k1", "k2", "k8", "k12"],
+  "2026-06-23": ["k5", "k7", "k10"],
+}
+
+export const anwesenheitenInitial: Anwesenheit[] = Object.entries(ANGEKUENDIGT_MOCK).flatMap(
+  ([datum, ids]) =>
+    ids.flatMap((id) => {
+      const p =
+        id === "me"
+          ? {
+              id: "me",
+              name: aktuellerNutzer.name,
+              initialen: aktuellerNutzer.initialen,
+              standortId: aktuellerNutzer.standortId,
+            }
+          : kollegen.find((k) => k.id === id)
+      if (!p) return []
+      return [
+        {
+          id: `${id}-${datum}`,
+          personId: p.id,
+          name: p.name,
+          initialen: p.initialen,
+          standortId: p.standortId,
+          datum,
+        },
+      ]
+    })
+)
 
 // --- Hilfsfunktionen ---
 
@@ -425,44 +464,34 @@ export function getKollege(id: string): Kollege | undefined {
   return kollegen.find((k) => k.id === id)
 }
 
-// Repräsentiert den aktuellen Nutzer als Kollege (für die Anwesenheitsliste).
-const ICH_ID = "ich"
-function nutzerAlsKollege(): Kollege {
-  return {
-    id: ICH_ID,
-    name: aktuellerNutzer.name,
-    initialen: aktuellerNutzer.initialen,
-    standortId: aktuellerNutzer.standortId,
-  }
-}
-
 /**
  * Ermittelt die anwesenden Kollegen für einen Standort an einem Datum (CLVN-037).
  *
- * Grundlage sind (a) die signalisierte Anwesenheit für den Tag (CLVN-038) gefiltert auf
- * den Standort sowie (b) bestehende Raumbuchungen am Standort/Tag, aus denen sich eine
- * Anwesenheit der buchenden Person ableiten lässt. Datenschutzkonform werden nur Name
- * und Anwesenheitsgrund zurückgegeben.
+ * Grundlage sind (a) die angekündigte (signalisierte) Anwesenheit für den Tag (CLVN-038),
+ * gefiltert auf den Standort, sowie (b) bestehende Raumbuchungen am Standort/Tag, aus denen
+ * sich eine Anwesenheit der buchenden Person ableiten lässt. Datenschutzkonform werden nur
+ * Name und Anwesenheitsgrund zurückgegeben.
  */
 export function anwesenheitFuer(
   standortId: string,
   datum: string,
+  angekuendigte: Anwesenheit[],
   buchungen: Buchung[] = []
-): Anwesenheit[] {
-  const ergebnis = new Map<string, Anwesenheit>()
+): AnwesenheitsEintrag[] {
+  const ergebnis = new Map<string, AnwesenheitsEintrag>()
 
-  function kollegeFuerId(id: string): Kollege | undefined {
-    return id === ICH_ID ? nutzerAlsKollege() : getKollege(id)
-  }
-
-  // (a) Signalisierte Anwesenheit für den Tag, gefiltert auf den Standort.
-  for (const id of signalisierteAnwesenheit[datum] ?? []) {
-    const k = kollegeFuerId(id)
-    if (!k || k.standortId !== standortId) continue
-    ergebnis.set(k.id, {
-      kollege: k,
+  // (a) Angekündigte Anwesenheit für Standort + Tag.
+  for (const a of angekuendigte) {
+    if (a.standortId !== standortId || a.datum !== datum) continue
+    ergebnis.set(a.personId, {
+      kollege: {
+        id: a.personId,
+        name: a.name,
+        initialen: a.initialen,
+        standortId: a.standortId,
+      },
       grund: "signalisiert",
-      istIchSelbst: k.id === ICH_ID,
+      istIchSelbst: a.personId === aktuellerNutzer.id,
     })
   }
 
@@ -470,17 +499,17 @@ export function anwesenheitFuer(
   for (const b of buchungen) {
     if (b.standortId !== standortId || b.datum !== datum || b.status !== "bestätigt") continue
     const istIch = b.gebuchtVon === aktuellerNutzer.name
-    const k = istIch
-      ? nutzerAlsKollege()
-      : kollegen.find((kol) => kol.name === b.gebuchtVon)
-    if (!k) continue
-    // Signalisierte Anwesenheit (a) hat Vorrang und bleibt erhalten.
-    if (ergebnis.has(k.id)) continue
-    ergebnis.set(k.id, {
-      kollege: k,
-      grund: "raumbuchung",
-      istIchSelbst: istIch,
-    })
+    const kollege: Kollege | undefined = istIch
+      ? {
+          id: aktuellerNutzer.id,
+          name: aktuellerNutzer.name,
+          initialen: aktuellerNutzer.initialen,
+          standortId,
+        }
+      : kollegen.find((k) => k.name === b.gebuchtVon)
+    if (!kollege) continue
+    if (ergebnis.has(kollege.id)) continue // signalisierte Anwesenheit hat Vorrang
+    ergebnis.set(kollege.id, { kollege, grund: "raumbuchung", istIchSelbst: istIch })
   }
 
   // Eigene Anwesenheit zuerst, sonst alphabetisch nach Name.
@@ -495,7 +524,7 @@ export function anwesenheitFuer(
 export const kollegenHeute: Record<string, Kollege[]> = Object.fromEntries(
   standorte.map((s) => [
     s.id,
-    anwesenheitFuer(s.id, HEUTE)
+    anwesenheitFuer(s.id, HEUTE, anwesenheitenInitial)
       .filter((a) => !a.istIchSelbst)
       .map((a) => a.kollege),
   ])
@@ -539,6 +568,35 @@ export function naechsteFreieZeitIn(
   )
   if (bel.length === 0) return null
   return bel[bel.length - 1].zeitfenster.ende
+}
+
+// --- Datums-Helfer für die Büroanwesenheit (CLVN-038) ---
+
+// Addiert eine Anzahl Tage zu einem ISO-Datum und gibt wieder ISO zurück.
+export function addiereTage(iso: string, tage: number): string {
+  const [jahr, monat, tag] = iso.split("-").map(Number)
+  const d = new Date(jahr, monat - 1, tag + tage)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+// Ein Datum liegt in der Vergangenheit, wenn es vor HEUTE liegt (ISO-String-Vergleich).
+export function istVergangen(iso: string): boolean {
+  return iso < HEUTE
+}
+
+// Die nächsten n Tage ab HEUTE als auswählbare Optionen (für Datums-Selects).
+export function naechsteTageOptionen(anzahl = 14): { iso: string; label: string }[] {
+  const wt = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
+  const mon = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
+  const optionen: { iso: string; label: string }[] = []
+  for (let i = 0; i < anzahl; i++) {
+    const iso = addiereTage(HEUTE, i)
+    const [jahr, monat, tag] = iso.split("-").map(Number)
+    const d = new Date(jahr, monat - 1, tag)
+    const prefix = i === 0 ? "Heute" : i === 1 ? "Morgen" : wt[d.getDay()]
+    optionen.push({ iso, label: `${prefix}, ${tag}. ${mon[monat - 1]} ${jahr}` })
+  }
+  return optionen
 }
 
 // Formatiert ein ISO-Datum als lesbares deutsches Datum
