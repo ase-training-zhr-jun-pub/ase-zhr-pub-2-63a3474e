@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom"
-import { Home, Plus, CalendarDays, LayoutGrid, MapPin } from "lucide-react"
+import { Home, Plus, CalendarDays, LayoutGrid, Users, MapPin } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { BenachrichtigungenGlocke } from "@/components/benachrichtigungen-glocke"
 import { cn } from "@/lib/utils"
@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { to: "/buchen", label: "Raum buchen", icon: Plus },
   { to: "/buchungen", label: "Meine Buchungen", icon: CalendarDays },
   { to: "/uebersicht", label: "Übersicht", icon: LayoutGrid },
+  { to: "/anwesenheit", label: "Anwesenheit", icon: Users },
 ]
 
 function Logo() {
