@@ -1,6 +1,17 @@
-import { useState, useEffect } from "react"
-import { MapPin, CalendarDays, Users, UserCheck, CalendarPlus } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useEffect, useMemo, useState } from "react"
+import {
+  MapPin,
+  CalendarDays,
+  Users,
+  UserCheck,
+  UserPlus,
+  CalendarPlus,
+  X,
+  Info,
+} from "lucide-react"
+import { toast } from "sonner"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -15,31 +26,17 @@ import {
   standorte,
   getStandort,
   anwesenheitFuer,
+  naechsteTageOptionen,
+  istVergangen,
   aktuellerNutzer,
-  formatDatum,
-  istHeute,
   HEUTE,
-  type Anwesenheit,
+  type AnwesenheitsEintrag,
   type Buchung,
 } from "@/lib/mock-data"
+import { useAnwesenheit } from "@/lib/anwesenheit-context"
 import { getBuchungen } from "@/lib/buchungen-api"
 
-// Auswählbare Tage: HEUTE und die folgenden 13 Tage.
-function naechsteTage(): { iso: string; label: string }[] {
-  const [jahr, monat, tag] = HEUTE.split("-").map(Number)
-  const wt = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
-  const mon = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
-  const tage: { iso: string; label: string }[] = []
-  for (let i = 0; i < 14; i++) {
-    const d = new Date(jahr, monat - 1, tag + i)
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
-    const prefix = i === 0 ? "Heute" : i === 1 ? "Morgen" : wt[d.getDay()]
-    tage.push({ iso, label: `${prefix}, ${d.getDate()}. ${mon[d.getMonth()]}` })
-  }
-  return tage
-}
-
-function AnwesenheitsZeile({ eintrag }: { eintrag: Anwesenheit }) {
+function AnwesenheitsZeile({ eintrag }: { eintrag: AnwesenheitsEintrag }) {
   return (
     <div
       className={cn(
@@ -85,13 +82,14 @@ function AnwesenheitsZeile({ eintrag }: { eintrag: Anwesenheit }) {
 }
 
 export function AnwesenheitPage() {
-  const tage = naechsteTage()
+  const { anwesenheiten, eigeneAnwesenheit, ankuendigen, entfernen } = useAnwesenheit()
+  const tage = useMemo(() => naechsteTageOptionen(14), [])
 
   const [standortId, setStandortId] = useState(aktuellerNutzer.standortId)
   const [datum, setDatum] = useState(HEUTE)
 
   // Bestehende Raumbuchungen am Standort/Tag laden — daraus wird zusätzlich zur
-  // signalisierten Anwesenheit die Präsenz der buchenden Personen abgeleitet (CLVN-037).
+  // angekündigten Anwesenheit die Präsenz der buchenden Personen abgeleitet (CLVN-037).
   const [buchungen, setBuchungen] = useState<Buchung[]>([])
   useEffect(() => {
     let abgebrochen = false
@@ -103,16 +101,34 @@ export function AnwesenheitPage() {
     }
   }, [standortId, datum])
 
-  const anwesende = anwesenheitFuer(standortId, datum, buchungen)
-  const standort = getStandort(standortId)
+  const anwesende = anwesenheitFuer(standortId, datum, anwesenheiten, buchungen)
+  const eigene = eigeneAnwesenheit(standortId, datum)
+  const vergangen = istVergangen(datum)
+  const standortName = getStandort(standortId)?.name ?? standortId
+  const datumLabel = tage.find((t) => t.iso === datum)?.label ?? datum
+
+  function handleAnkuendigen() {
+    if (ankuendigen(standortId, datum)) {
+      toast.success(`Anwesenheit angekündigt: ${standortName}, ${datumLabel}`)
+    } else if (vergangen) {
+      toast.error("Für vergangene Tage kann keine Anwesenheit angekündigt werden.")
+    }
+  }
+
+  function handleEntfernen() {
+    if (!eigene) return
+    entfernen(eigene.id)
+    toast.success("Anwesenheit entfernt.")
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Kollegen-Anwesenheit</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Büroanwesenheit</h1>
           <p className="mt-1 text-muted-foreground">
-            Wer ist an einem Standort vor Ort? Plane deinen Bürotag für persönliche Treffen.
+            Wer ist an einem Standort vor Ort? Kündige deine eigene Anwesenheit an und plane
+            deinen Bürotag für persönliche Treffen.
           </p>
         </div>
         <div className="flex gap-3">
@@ -147,24 +163,65 @@ export function AnwesenheitPage() {
         </div>
       </div>
 
+      {/* Eigene Anwesenheit ankündigen / entfernen (CLVN-038) */}
       <Card>
-        <CardContent className="py-5">
-          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Users className="h-5 w-5" />
-            <span>
-              {anwesende.length === 0
-                ? "Niemand"
-                : `${anwesende.length} ${anwesende.length === 1 ? "Person" : "Personen"}`}{" "}
-              {istHeute(datum) ? "heute" : "am " + formatDatum(datum)} in{" "}
-              <strong className="text-foreground">{standort?.name}</strong>
-            </span>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserCheck className="h-5 w-5 text-primary" />
+            Deine Anwesenheit
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm">
+              {eigene ? (
+                <p>
+                  Du bist für <strong>{standortName}</strong> am{" "}
+                  <strong>{datumLabel}</strong> als anwesend angekündigt.
+                </p>
+              ) : vergangen ? (
+                <p className="text-muted-foreground">
+                  Für vergangene Tage kann keine Anwesenheit mehr angekündigt werden.
+                </p>
+              ) : (
+                <p className="text-muted-foreground">
+                  Du bist für <strong>{standortName}</strong> am{" "}
+                  <strong>{datumLabel}</strong> noch nicht angekündigt.
+                </p>
+              )}
+            </div>
+            {eigene ? (
+              <Button variant="destructive" size="lg" onClick={handleEntfernen}>
+                <X className="h-4 w-4" />
+                Anwesenheit entfernen
+              </Button>
+            ) : (
+              <Button size="lg" disabled={vergangen} onClick={handleAnkuendigen}>
+                <UserPlus className="h-4 w-4" />
+                Anwesenheit ankündigen
+              </Button>
+            )}
           </div>
+        </CardContent>
+      </Card>
 
+      {/* Wer ist da? — kombinierte Ansicht aus Anmeldungen + Buchungen (CLVN-037) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-muted-foreground" />
+            Wer ist da? — {standortName}, {datumLabel}
+            <Badge variant="secondary" className="ml-1">
+              {anwesende.length}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           {anwesende.length === 0 ? (
             <div className="rounded-lg border border-dashed py-10 text-center">
               <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground/50" />
               <p className="text-sm text-muted-foreground">
-                Für {standort?.name} hat sich an diesem Tag noch niemand angekündigt.
+                Für {standortName} hat sich an diesem Tag noch niemand angekündigt.
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Sobald Kollegen ihre Anwesenheit signalisieren oder einen Raum buchen,
@@ -181,9 +238,11 @@ export function AnwesenheitPage() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-muted-foreground">
-        Aus Datenschutzgründen werden nur Name und Anwesenheit angezeigt (QS-4 / DSGVO).
-      </p>
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Info className="h-4 w-4 shrink-0" />
+        Du kannst ausschließlich deine eigene Anwesenheit verwalten. Aus Datenschutzgründen
+        werden nur Name und Anwesenheit angezeigt (QS-4 / DSGVO).
+      </div>
     </div>
   )
 }

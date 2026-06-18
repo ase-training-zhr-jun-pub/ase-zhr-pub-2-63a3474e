@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { AppLayout } from "@/components/app-layout"
 import { BuchungProvider } from "@/lib/buchung-context"
 import { BenachrichtigungProvider } from "@/lib/benachrichtigung-context"
+import { AnwesenheitProvider } from "@/lib/anwesenheit-context"
 import { Toaster } from "@/components/ui/sonner"
 import { DashboardPage } from "@/pages/dashboard"
 import { BuchenPage } from "@/pages/buchen"
@@ -24,19 +25,21 @@ function App() {
   return (
     <BuchungProvider>
       <BenachrichtigungProvider>
-        <BrowserRouter basename={basename}>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/buchen/*" element={<BuchenPage />} />
-              <Route path="/buchungen" element={<MeineBuchungenPage />} />
-              <Route path="/buchungen/:id" element={<MeineBuchungenPage />} />
-              <Route path="/uebersicht" element={<UebersichtPage />} />
-              <Route path="/anwesenheit" element={<AnwesenheitPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-        <Toaster position="top-center" richColors />
+        <AnwesenheitProvider>
+          <BrowserRouter basename={basename}>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/buchen/*" element={<BuchenPage />} />
+                <Route path="/buchungen" element={<MeineBuchungenPage />} />
+                <Route path="/buchungen/:id" element={<MeineBuchungenPage />} />
+                <Route path="/uebersicht" element={<UebersichtPage />} />
+                <Route path="/anwesenheit" element={<AnwesenheitPage />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+          <Toaster position="top-center" richColors />
+        </AnwesenheitProvider>
       </BenachrichtigungProvider>
     </BuchungProvider>
   )
